@@ -11,6 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 /**
@@ -45,7 +46,7 @@ public class MarkedUpdatedSubscriber {
             .forEach(c -> {
                 if(!portfolio.getPortfolio().containsKey(c.getSymbol())) {
                     Float openPrice = c.getLatestPrice() + (c.getLatestPrice() * 0.001f);
-                    portfolio.getPortfolio().put(c.getSymbol(), new Position(c.getSymbol(), openPrice, 0.001f));
+                    portfolio.getPortfolio().put(c.getSymbol(), new Position(c.getSymbol(), openPrice, 0.001f, LocalDateTime.now()));
                     logger.debug(String.format("Opened new position on %s at %.8f BTC", c.getSymbol(), openPrice));
                 }
             });
@@ -72,7 +73,7 @@ public class MarkedUpdatedSubscriber {
         this.portfolio.getPortfolio().entrySet()
             .removeIf(entry ->  {
                 Position position = entry.getValue();
-                if(position.getChange() > 5) {
+                if(shouldClosePosition(position, 5f)) {
                     logger.debug(String.format("Closed position on %s with result %.4f", position.getSymbol(), position.getChange()));
                     Float finalPrice = PriceUtil.addPercentage(position.getOpenPrice(), position.getChange());
                     counters.addToProfit(finalPrice - position.getOpenPrice());
@@ -82,4 +83,16 @@ public class MarkedUpdatedSubscriber {
                 return false;
             });
     }
+
+
+    private Boolean shouldClosePosition(Position position, Float gain) {
+
+        LocalDateTime t = position.getOpenTime().plusMinutes(30);
+
+        if(position.getChange() > gain && position.getOpenTime().isAfter(t)) {
+            return true;
+        }
+        return false;
+    }
+
 }
