@@ -15,8 +15,6 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 /**
  * @author daniele.orler
  */
-@Component
-@Primary
 public class KLineSocketHandler extends TextWebSocketHandler {
 
     protected Log logger = LogFactory.getLog(KLineSocketHandler.class);

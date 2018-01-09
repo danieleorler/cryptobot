@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
  * @author daniele.orler
  */
 
-@Service
 public class MarketChangeService {
 
     private final MarketsStatus marketsStatus;

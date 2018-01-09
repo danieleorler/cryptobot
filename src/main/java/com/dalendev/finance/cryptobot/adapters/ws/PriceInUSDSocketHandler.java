@@ -14,7 +14,6 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 /**
  * @author daniele.orler
  */
-@Component
 public class PriceInUSDSocketHandler extends TextWebSocketHandler {
 
     protected Log logger = LogFactory.getLog(KLineSocketHandler.class);

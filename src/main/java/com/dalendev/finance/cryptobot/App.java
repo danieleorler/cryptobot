@@ -1,53 +1,28 @@
 package com.dalendev.finance.cryptobot;
 
-import com.dalendev.finance.cryptobot.adapters.ws.KLineSocketHandler;
-import com.dalendev.finance.cryptobot.adapters.ws.PriceInUSDSocketHandler;
-import com.dalendev.finance.cryptobot.model.BTCPrice;
-import com.dalendev.finance.cryptobot.model.MarketsStatus;
-import com.dalendev.finance.cryptobot.model.Symbol;
+import com.dalendev.finance.cryptobot.model.Counters;
+import com.dalendev.finance.cryptobot.model.Market;
+import com.dalendev.finance.cryptobot.model.Portfolio;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import com.google.common.eventbus.AsyncEventBus;
+import com.google.common.eventbus.EventBus;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.web.socket.client.WebSocketClient;
-import org.springframework.web.socket.client.WebSocketConnectionManager;
-import org.springframework.web.socket.client.standard.StandardWebSocketClient;
-import org.springframework.web.socket.handler.TextWebSocketHandler;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.concurrent.Executors;
 
 /**
  * @author daniele.orler
  */
 @SpringBootApplication
+@EnableScheduling
 public class App {
-
-    @Autowired
-    private KLineSocketHandler kLineSocketHandler;
-    @Autowired
-    PriceInUSDSocketHandler priceInUSDSocketHandler;
 
     public static void main(final String[] args) {
         SpringApplication.run(App.class, args);
-    }
-
-
-    @Bean
-    public List<WebSocketConnectionManager> wsConnectionManager(WebSocketClient client) {
-
-        return Arrays.stream(Symbol.values())
-            .map(symbol -> startWSConnection(client, symbol))
-            .collect(Collectors.toList());
-
-    }
-
-    @Bean
-    public StandardWebSocketClient client() {
-        return new StandardWebSocketClient();
     }
 
     @Bean
@@ -56,34 +31,28 @@ public class App {
     }
 
     @Bean
-    MarketsStatus marketsStatus() {
-        return new MarketsStatus();
+    RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 
     @Bean
-    BTCPrice btcPrice() {
-        return new BTCPrice();
+    public EventBus eventBus() {
+        return new AsyncEventBus(Executors.newCachedThreadPool());
     }
 
-    private WebSocketConnectionManager startWSConnection(WebSocketClient client, Symbol symbol) {
+    @Bean
+    Market marketsStatus() {
+        return new Market();
+    }
 
-        TextWebSocketHandler handler;
+    @Bean
+    Portfolio portfolio() {
+        return new Portfolio();
+    }
 
-        if(symbol.isBasePrice()) {
-            handler = priceInUSDSocketHandler;
-        } else {
-            handler = kLineSocketHandler;
-        }
-
-        WebSocketConnectionManager manager = new WebSocketConnectionManager(
-                client,
-                handler,
-                "wss://stream.binance.com:9443/ws/"+symbol.getTopic()+"@kline_1m"
-        );
-        manager.setAutoStartup(true);
-        manager.start();
-
-        return manager;
+    @Bean
+    Counters counters() {
+        return new Counters();
     }
 
 }

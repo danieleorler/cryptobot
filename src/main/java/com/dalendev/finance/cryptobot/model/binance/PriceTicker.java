@@ -1,18 +1,12 @@
 package com.dalendev.finance.cryptobot.model.binance;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PriceTicker {
 
     private String symbol;
-    private Float bidPrice;
-    @JsonProperty("bidQty")
-    private Float bidQuantity;
-    private Float askPrice;
-    @JsonProperty("askQty")
-    private Float askQuantity;
+    private Float price;
 
     public String getSymbol() {
         return symbol;
@@ -22,35 +16,12 @@ public class PriceTicker {
         this.symbol = symbol;
     }
 
-    public Float getBidPrice() {
-        return bidPrice;
+    public Float getPrice() {
+        return price;
     }
 
-    public void setBidPrice(Float bidPrice) {
-        this.bidPrice = bidPrice;
+    public void setPrice(Float price) {
+        this.price = price;
     }
 
-    public Float getBidQuantity() {
-        return bidQuantity;
-    }
-
-    public void setBidQuantity(Float bidQuantity) {
-        this.bidQuantity = bidQuantity;
-    }
-
-    public Float getAskPrice() {
-        return askPrice;
-    }
-
-    public void setAskPrice(Float askPrice) {
-        this.askPrice = askPrice;
-    }
-
-    public Float getAskQuantity() {
-        return askQuantity;
-    }
-
-    public void setAskQuantity(Float askQuantity) {
-        this.askQuantity = askQuantity;
-    }
 }
