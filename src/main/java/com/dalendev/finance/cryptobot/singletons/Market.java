@@ -1,4 +1,6 @@
-package com.dalendev.finance.cryptobot.model;
+package com.dalendev.finance.cryptobot.singletons;
+
+import com.dalendev.finance.cryptobot.model.CryptoCurrency;
 
 import java.util.HashMap;
 import java.util.Map;

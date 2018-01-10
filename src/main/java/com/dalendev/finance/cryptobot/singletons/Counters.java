@@ -1,4 +1,4 @@
-package com.dalendev.finance.cryptobot.model;
+package com.dalendev.finance.cryptobot.singletons;
 
 /**
  * @author daniele.orler

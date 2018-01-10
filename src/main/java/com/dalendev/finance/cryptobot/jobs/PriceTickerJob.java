@@ -33,7 +33,7 @@ public class PriceTickerJob {
         this.eventBus = eventBus;
     }
 
-    @Scheduled(fixedDelay = 60000)
+    @Scheduled(initialDelay = 10000, fixedDelay = 60000)
     public void samplePrice() {
         try {
             List<PriceTicker> priceTickers = this.priceTickerAdapter.getPriceTickers();

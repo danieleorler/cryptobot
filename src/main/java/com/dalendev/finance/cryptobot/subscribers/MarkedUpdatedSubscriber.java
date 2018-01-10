@@ -4,6 +4,9 @@ import com.dalendev.finance.cryptobot.adapters.rest.binance.OrderAdapter;
 import com.dalendev.finance.cryptobot.model.*;
 import com.dalendev.finance.cryptobot.model.events.MarketUpdatedEvent;
 import com.dalendev.finance.cryptobot.model.events.PositionsCreatedEvent;
+import com.dalendev.finance.cryptobot.singletons.Counters;
+import com.dalendev.finance.cryptobot.singletons.Market;
+import com.dalendev.finance.cryptobot.singletons.Portfolio;
 import com.dalendev.finance.cryptobot.util.PriceUtil;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -12,7 +15,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.Map;
 
 /**

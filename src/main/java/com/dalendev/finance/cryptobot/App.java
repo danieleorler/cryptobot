@@ -1,9 +1,10 @@
 package com.dalendev.finance.cryptobot;
 
 import com.dalendev.finance.cryptobot.adapters.rest.binance.RestTemplateErrorHandler;
-import com.dalendev.finance.cryptobot.model.Counters;
-import com.dalendev.finance.cryptobot.model.Market;
-import com.dalendev.finance.cryptobot.model.Portfolio;
+import com.dalendev.finance.cryptobot.singletons.Counters;
+import com.dalendev.finance.cryptobot.singletons.Exchange;
+import com.dalendev.finance.cryptobot.singletons.Market;
+import com.dalendev.finance.cryptobot.singletons.Portfolio;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
@@ -56,6 +57,11 @@ public class App {
     @Bean
     Counters counters() {
         return new Counters();
+    }
+
+    @Bean
+    Exchange exchange() {
+        return new Exchange();
     }
 
 }

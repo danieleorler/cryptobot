@@ -1,7 +1,7 @@
 package com.dalendev.finance.cryptobot.services;
 
 import com.dalendev.finance.cryptobot.model.CryptoCurrency;
-import com.dalendev.finance.cryptobot.model.Market;
+import com.dalendev.finance.cryptobot.singletons.Market;
 import com.dalendev.finance.cryptobot.model.binance.PriceTicker;
 import com.dalendev.finance.cryptobot.util.PriceUtil;
 import org.springframework.beans.factory.annotation.Autowired;
