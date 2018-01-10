@@ -52,17 +52,18 @@ public class MarkedUpdatedSubscriber {
     public void selectOrders(MarketUpdatedEvent event) {
         List<Order> orders = this.market.getMarket().entrySet().stream()
             .map(Map.Entry::getValue)
-            .filter(c -> c.getChange() > 1)
+            .filter(c -> c.getChange() > 5)
             .sorted((c1, c2) -> Float.compare(c2.getChange(), c1.getChange()))
             .map(c -> {
                 Float stepSize = exchange.getLotFilter(c.getSymbol()).getStepSize();
                 Float quantity = PriceUtil.adjust(0.001f / c.getLatestPrice(), stepSize);
-                return new Order(
-                    c.getSymbol(),
-                    Order.Side.BUY,
-                    Order.Type.MARKET,
-                    quantity
-                );
+                return new Order.Builder()
+                    .symbol(c.getSymbol())
+                    .side(Order.Side.BUY)
+                    .type(Order.Type.MARKET)
+                    .quantity(quantity)
+                    .price(c.getLatestPrice())
+                    .build();
             })
             .collect(Collectors.toList());
 
