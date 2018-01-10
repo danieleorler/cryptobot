@@ -13,4 +13,9 @@ public class PriceUtil {
         return price + (price * percentage/100);
     }
 
+    public static Float adjust(Float amount, Float lot) {
+        float reminder = amount % lot;
+        return reminder > 0f ? lot - reminder + amount : amount;
+    }
+
 }
