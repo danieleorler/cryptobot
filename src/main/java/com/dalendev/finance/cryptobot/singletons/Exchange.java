@@ -21,11 +21,11 @@ public class Exchange {
 
     public Filters.LotFilter getLotFilter(String symbol) {
         Filters.Filter filter = exchangeInfo.getSymbols().stream()
-                .filter(s -> s.getSymbol().equals(symbol))
+                .filter(s -> s.getSymbol().equalsIgnoreCase(symbol))
                 .flatMap(s -> s.getFilters().stream())
                 .filter(f -> f.getFilterType() == Filters.FilterType.LOT_SIZE)
                 .findFirst()
-                .orElseThrow(() -> new SymbolFilterNotFoundException(""));
+                .orElseThrow(() -> new SymbolFilterNotFoundException("Couldn't find filter for symbol " + symbol));
 
         return (Filters.LotFilter)filter;
     }

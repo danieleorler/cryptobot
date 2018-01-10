@@ -24,7 +24,7 @@ public class Filters {
         MIN_NOTIONAL
     }
 
-    @JsonTypeInfo(use = Id.CUSTOM, property = "filterType", include = As.EXISTING_PROPERTY)
+    @JsonTypeInfo(use = Id.CUSTOM, property = "filterType", include = As.EXTERNAL_PROPERTY, visible = true)
     @JsonTypeIdResolver(value = Resolver.class)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static abstract class Filter {

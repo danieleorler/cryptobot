@@ -5,6 +5,7 @@ import com.dalendev.finance.cryptobot.model.*;
 import com.dalendev.finance.cryptobot.model.events.MarketUpdatedEvent;
 import com.dalendev.finance.cryptobot.model.events.PositionsCreatedEvent;
 import com.dalendev.finance.cryptobot.singletons.Counters;
+import com.dalendev.finance.cryptobot.singletons.Exchange;
 import com.dalendev.finance.cryptobot.singletons.Market;
 import com.dalendev.finance.cryptobot.singletons.Portfolio;
 import com.dalendev.finance.cryptobot.util.PriceUtil;
@@ -31,14 +32,16 @@ public class MarkedUpdatedSubscriber {
     private final EventBus eventBus;
     private final Counters counters;
     private final OrderAdapter orderAdapter;
+    private final Exchange exchange;
 
     @Autowired
-    public MarkedUpdatedSubscriber(Market market, EventBus eventBus, Portfolio portfolio, Counters counters, OrderAdapter orderAdapter) {
+    public MarkedUpdatedSubscriber(Market market, EventBus eventBus, Portfolio portfolio, Counters counters, OrderAdapter orderAdapter, Exchange exchange) {
         this.market = market;
         this.portfolio = portfolio;
         this.eventBus = eventBus;
         this.counters = counters;
         this.orderAdapter = orderAdapter;
+        this.exchange = exchange;
         eventBus.register(this);
     }
 
@@ -50,7 +53,8 @@ public class MarkedUpdatedSubscriber {
             .sorted((c1, c2) -> Float.compare(c2.getChange(), c1.getChange()))
             .forEach(c -> {
                 if(!portfolio.getPortfolio().containsKey(c.getSymbol())) {
-                    Float quantity = PriceUtil.adjust(0.002f / c.getLatestPrice(), 0.001f);
+                    Float quantity = PriceUtil.adjust(0.002f / c.getLatestPrice(), exchange.getLotFilter(c.getSymbol()).getStepSize()
+                    );
                     try {
                         orderAdapter.placeOrder(c.getSymbol(), "BUY", "MARKET", quantity);
                         logger.debug(String.format("Placed order for %.8f %s at %.8f", quantity, c.getSymbol(), c.getLatestPrice()));
