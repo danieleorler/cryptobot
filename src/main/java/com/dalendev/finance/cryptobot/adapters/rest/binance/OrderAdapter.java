@@ -1,5 +1,6 @@
 package com.dalendev.finance.cryptobot.adapters.rest.binance;
 
+import com.dalendev.finance.cryptobot.model.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
@@ -26,13 +27,13 @@ public class OrderAdapter extends BaseAdapter {
         super(restTemplate);
     }
 
-    public String placeOrder(String symbol, String side, String type, Float quantity) throws URISyntaxException, IOException {
+    public String placeOrder(Order order) throws URISyntaxException, IOException {
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("symbol", symbol);
-        body.add("side", side);
-        body.add("type", type);
-        body.add("quantity", String.format("%.2f", quantity));
+        body.add("symbol", order.getSymbol());
+        body.add("side", order.getSide().name());
+        body.add("type", order.getType().name());
+        body.add("quantity", Float.toString(order.getQuantity()));
         body.add("timestamp", Long.toString(Instant.now().toEpochMilli()));
 
         RequestEntity<MultiValueMap<String, String>> request = RequestEntity

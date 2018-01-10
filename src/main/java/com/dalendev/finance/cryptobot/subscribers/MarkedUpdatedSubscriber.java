@@ -3,6 +3,7 @@ package com.dalendev.finance.cryptobot.subscribers;
 import com.dalendev.finance.cryptobot.adapters.rest.binance.OrderAdapter;
 import com.dalendev.finance.cryptobot.model.*;
 import com.dalendev.finance.cryptobot.model.events.MarketUpdatedEvent;
+import com.dalendev.finance.cryptobot.model.events.OrdersSelectedEvent;
 import com.dalendev.finance.cryptobot.model.events.PositionsCreatedEvent;
 import com.dalendev.finance.cryptobot.singletons.Counters;
 import com.dalendev.finance.cryptobot.singletons.Exchange;
@@ -16,7 +17,9 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author daniele.orler
@@ -46,27 +49,43 @@ public class MarkedUpdatedSubscriber {
     }
 
     @Subscribe
-    public void updateMarket(MarketUpdatedEvent event) {
-        this.market.getMarket().entrySet().stream()
+    public void selectOrders(MarketUpdatedEvent event) {
+        List<Order> orders = this.market.getMarket().entrySet().stream()
             .map(Map.Entry::getValue)
             .filter(c -> c.getChange() > 1)
             .sorted((c1, c2) -> Float.compare(c2.getChange(), c1.getChange()))
-            .forEach(c -> {
-                if(!portfolio.getPortfolio().containsKey(c.getSymbol())) {
-                    Float quantity = PriceUtil.adjust(0.002f / c.getLatestPrice(), exchange.getLotFilter(c.getSymbol()).getStepSize()
-                    );
-                    try {
-                        orderAdapter.placeOrder(c.getSymbol(), "BUY", "MARKET", quantity);
-                        logger.debug(String.format("Placed order for %.8f %s at %.8f", quantity, c.getSymbol(), c.getLatestPrice()));
-                    } catch (Exception e) {
-                        logger.error(String.format("Error placing an order for %.8f %s at %.8f", quantity, c.getSymbol(), c.getLatestPrice()));
-                        logger.error(e);
-                    }
+            .map(c -> {
+                Float stepSize = exchange.getLotFilter(c.getSymbol()).getStepSize();
+                Float quantity = PriceUtil.adjust(0.001f / c.getLatestPrice(), stepSize);
+                return new Order(
+                    c.getSymbol(),
+                    Order.Side.BUY,
+                    Order.Type.MARKET,
+                    quantity
+                );
+            })
+            .collect(Collectors.toList());
 
+        if(orders.size() > 0) {
+            OrdersSelectedEvent ordersSelectedEvent = new OrdersSelectedEvent();
+            ordersSelectedEvent.getOrders().addAll(orders);
+            eventBus.post(ordersSelectedEvent);
+        }
+    }
+
+    @Subscribe
+    public void placeOrders(OrdersSelectedEvent event) {
+        event.getOrders().stream()
+            .filter(order -> !portfolio.getPortfolio().containsKey(order.getSymbol()))
+            .forEach(order -> {
+                try {
+                    orderAdapter.placeOrder(order);
+                    logger.debug(order);
+                } catch (Exception e) {
+                    logger.error("Error placing order: " + order);
+                    logger.error(e);
                 }
             });
-
-        eventBus.post(new PositionsCreatedEvent());
     }
 
     @Subscribe
