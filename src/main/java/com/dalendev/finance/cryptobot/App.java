@@ -1,5 +1,6 @@
 package com.dalendev.finance.cryptobot;
 
+import com.dalendev.finance.cryptobot.adapters.rest.binance.RestTemplateErrorHandler;
 import com.dalendev.finance.cryptobot.model.Counters;
 import com.dalendev.finance.cryptobot.model.Market;
 import com.dalendev.finance.cryptobot.model.Portfolio;
@@ -31,8 +32,10 @@ public class App {
     }
 
     @Bean
-    RestTemplate restTemplate() {
-        return new RestTemplate();
+    RestTemplate restTemplate(ObjectMapper objectMapper) {
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.setErrorHandler(new RestTemplateErrorHandler(objectMapper));
+        return restTemplate;
     }
 
     @Bean
