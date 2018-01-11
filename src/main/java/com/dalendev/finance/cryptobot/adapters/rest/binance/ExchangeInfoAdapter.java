@@ -1,6 +1,7 @@
 package com.dalendev.finance.cryptobot.adapters.rest.binance;
 
 import com.dalendev.finance.cryptobot.model.binance.exchange.ExchangeInfo;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +19,8 @@ import java.net.URISyntaxException;
 public class ExchangeInfoAdapter extends BaseAdapter {
 
     @Autowired
-    public ExchangeInfoAdapter(RestTemplate restTemplate) {
-        super(restTemplate);
+    public ExchangeInfoAdapter(RestTemplate restTemplate, ObjectMapper objectMapper) {
+        super(restTemplate, objectMapper);
     }
 
 

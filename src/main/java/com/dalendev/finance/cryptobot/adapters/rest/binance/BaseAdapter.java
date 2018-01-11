@@ -1,6 +1,7 @@
 package com.dalendev.finance.cryptobot.adapters.rest.binance;
 
 import com.dalendev.finance.cryptobot.model.exceptions.EncodingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.codec.binary.Hex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +19,7 @@ public class BaseAdapter {
 
     protected final String baseUrl = "https://api.binance.com";
     protected final RestTemplate restTemplate;
+    protected final ObjectMapper objectMapper;
 
     @Value("${binance.api_key}")
     protected String apiKey;
@@ -26,8 +28,9 @@ public class BaseAdapter {
     private String apiSecret;
 
     @Autowired
-    public BaseAdapter(RestTemplate restTemplate) {
+    public BaseAdapter(RestTemplate restTemplate, ObjectMapper objectMapper) {
         this.restTemplate = restTemplate;
+        this.objectMapper = objectMapper;
     }
 
     protected MultiValueMap<String, String> sign(MultiValueMap<String, String> params) {

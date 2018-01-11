@@ -1,5 +1,8 @@
 package com.dalendev.finance.cryptobot.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * @author daniele.orler
  */
@@ -10,6 +13,20 @@ public class Order {
     private final Type type;
     private final Float quantity;
     private final Float price;
+    private Long id;
+    private Status status;
+
+    public enum Status {
+        TO_BE_PLACED,
+        PLACED,
+        NEW,
+        PARTIALLY_FILLED,
+        FILLED,
+        CANCELED,
+        PENDING_CANCEL,
+        REJECTED,
+        EXPIRED
+    }
 
     public enum Side {
         BUY,
@@ -26,7 +43,19 @@ public class Order {
         LIMIT_MAKER,
     }
 
-    public Order(String symbol, Side side, Type type, Float quantity, Float price) {
+    public enum TimeInForce {
+        GTC,
+        IOC,
+        FOK
+    }
+
+    @JsonCreator
+    public Order(
+            @JsonProperty("symbol") String symbol,
+            @JsonProperty("side") Side side,
+            @JsonProperty("type") Type type,
+            @JsonProperty("executedQty") Float quantity,
+            @JsonProperty("price") Float price) {
         this.symbol = symbol;
         this.side = side;
         this.type = type;
@@ -50,9 +79,26 @@ public class Order {
         return quantity;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
-        return String.format("%s %.8f %s at price %.8f with type %s",
+        return String.format("%s %s %.8f %s at price %.8f with type %s",
+                status,
                 side,
                 quantity,
                 symbol,
@@ -66,6 +112,8 @@ public class Order {
         private Type type;
         private Float quantity;
         private Float price;
+        private Long id;
+        private Status status;
 
         public Builder symbol(String symbol) {
             this.symbol = symbol;
@@ -92,8 +140,26 @@ public class Order {
             return this;
         }
 
+        public Builder id(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder id(Integer id) {
+            this.id = new Long(id);
+            return this;
+        }
+
+        public Builder status(Status status) {
+            this.status = status;
+            return this;
+        }
+
         public Order build() {
-            return new Order(symbol,side, type, quantity, price);
+            Order order = new Order(symbol, side, type, quantity, price);
+            order.setId(id);
+            order.setStatus(status);
+            return order;
         }
     }
 }

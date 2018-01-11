@@ -1,5 +1,6 @@
 package com.dalendev.finance.cryptobot.singletons;
 
+import com.dalendev.finance.cryptobot.model.Order;
 import com.dalendev.finance.cryptobot.model.Position;
 
 import java.util.HashMap;
@@ -10,13 +11,19 @@ import java.util.Map;
  */
 public class Portfolio {
 
-    private final Map<String, Position> portfolio;
+    private final Map<String, Position> positions;
+    private final Map<String, Order> orders;
 
     public Portfolio() {
-        this.portfolio = new HashMap<>();
+        this.positions = new HashMap<>();
+        this.orders = new HashMap<>();
     }
 
-    public Map<String, Position> getPortfolio() {
-        return portfolio;
+    public Map<String, Position> getPositions() {
+        return positions;
+    }
+
+    public Map<String, Order> getOrders() {
+        return orders;
     }
 }

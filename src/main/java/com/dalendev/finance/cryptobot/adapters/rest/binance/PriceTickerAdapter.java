@@ -1,6 +1,7 @@
 package com.dalendev.finance.cryptobot.adapters.rest.binance;
 
 import com.dalendev.finance.cryptobot.model.binance.PriceTicker;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +23,8 @@ public class PriceTickerAdapter extends BaseAdapter {
 
 
     @Autowired
-    public PriceTickerAdapter(RestTemplate restTemplate) {
-        super(restTemplate);
+    public PriceTickerAdapter(RestTemplate restTemplate, ObjectMapper objectMapper) {
+        super(restTemplate, objectMapper);
     }
 
     public List<PriceTicker> getPriceTickers() throws URISyntaxException, IOException {

@@ -63,6 +63,7 @@ public class MarkedUpdatedSubscriber {
                     .type(Order.Type.MARKET)
                     .quantity(quantity)
                     .price(c.getLatestPrice())
+                    .status(Order.Status.TO_BE_PLACED)
                     .build();
             })
             .collect(Collectors.toList());
@@ -77,10 +78,12 @@ public class MarkedUpdatedSubscriber {
     @Subscribe
     public void placeOrders(OrdersSelectedEvent event) {
         event.getOrders().stream()
-            .filter(order -> !portfolio.getPortfolio().containsKey(order.getSymbol()))
+            .filter(order -> !portfolio.getPositions().containsKey(order.getSymbol()))
             .forEach(order -> {
                 try {
-                    orderAdapter.placeOrder(order);
+                    Long orderId = orderAdapter.placeOrder(order);
+                    order.setId(orderId);
+                    order.setStatus(Order.Status.PLACED);
                     logger.debug(order);
                 } catch (Exception e) {
                     logger.error("Error placing order: " + order);
@@ -91,7 +94,7 @@ public class MarkedUpdatedSubscriber {
 
     @Subscribe
     public void updatePositions(PositionsCreatedEvent event) {
-        this.portfolio.getPortfolio().entrySet().stream()
+        this.portfolio.getPositions().entrySet().stream()
             .map(Map.Entry::getValue)
             .forEach(position -> {
                 CryptoCurrency crypto = market.getMarket().get(position.getSymbol());
@@ -105,7 +108,7 @@ public class MarkedUpdatedSubscriber {
                         position.getChange()));
             });
 
-        this.portfolio.getPortfolio().entrySet()
+        this.portfolio.getPositions().entrySet()
             .removeIf(entry ->  {
                 Position position = entry.getValue();
                 if(shouldClosePosition(position, 5f)) {
