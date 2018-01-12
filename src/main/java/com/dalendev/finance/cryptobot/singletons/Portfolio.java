@@ -3,8 +3,8 @@ package com.dalendev.finance.cryptobot.singletons;
 import com.dalendev.finance.cryptobot.model.Order;
 import com.dalendev.finance.cryptobot.model.Position;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author daniele.orler
@@ -15,8 +15,8 @@ public class Portfolio {
     private final Map<String, Order> orders;
 
     public Portfolio() {
-        this.positions = new HashMap<>();
-        this.orders = new HashMap<>();
+        this.positions = new ConcurrentHashMap<>();
+        this.orders = new ConcurrentHashMap<>();
     }
 
     public Map<String, Position> getPositions() {

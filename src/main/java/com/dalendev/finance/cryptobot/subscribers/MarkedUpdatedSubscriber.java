@@ -2,9 +2,7 @@ package com.dalendev.finance.cryptobot.subscribers;
 
 import com.dalendev.finance.cryptobot.adapters.rest.binance.OrderAdapter;
 import com.dalendev.finance.cryptobot.model.*;
-import com.dalendev.finance.cryptobot.model.events.MarketUpdatedEvent;
-import com.dalendev.finance.cryptobot.model.events.OrdersSelectedEvent;
-import com.dalendev.finance.cryptobot.model.events.PositionsCreatedEvent;
+import com.dalendev.finance.cryptobot.model.events.*;
 import com.dalendev.finance.cryptobot.singletons.Counters;
 import com.dalendev.finance.cryptobot.singletons.Exchange;
 import com.dalendev.finance.cryptobot.singletons.Market;
@@ -49,11 +47,12 @@ public class MarkedUpdatedSubscriber {
     }
 
     @Subscribe
-    public void selectOrders(MarketUpdatedEvent event) {
+    public void selectBuyOrders(PositionsUpdatedEvent event) {
         List<Order> orders = this.market.getMarket().entrySet().stream()
             .map(Map.Entry::getValue)
-            .filter(c -> c.getChange() > 5)
-            .sorted((c1, c2) -> Float.compare(c2.getChange(), c1.getChange()))
+            .filter(crypto -> !portfolio.getPositions().containsKey(crypto.getSymbol()))
+            .filter(crypto -> !portfolio.getOrders().containsKey(crypto.getSymbol()))
+            .filter(crypto -> crypto.getChange() > 1)
             .map(c -> {
                 Float stepSize = exchange.getLotFilter(c.getSymbol()).getStepSize();
                 Float quantity = PriceUtil.adjust(0.001f / c.getLatestPrice(), stepSize);
@@ -76,15 +75,37 @@ public class MarkedUpdatedSubscriber {
     }
 
     @Subscribe
+    public void selectSellOrders(PositionsUpdatedEvent event) {
+        List<Order> orders = portfolio.getPositions().entrySet().stream()
+            .map(Map.Entry::getValue)
+            .filter(position -> position.getChange() > 1)
+            .map(p -> new Order.Builder()
+                .symbol(p.getSymbol())
+                .side(Order.Side.SELL)
+                .type(Order.Type.MARKET)
+                .quantity(p.getAmount())
+                .price(PriceUtil.addPercentage(p.getOpenPrice(), p.getChange()))
+                .status(Order.Status.TO_BE_PLACED)
+                .build()
+            ).collect(Collectors.toList());
+
+        if(orders.size() > 0) {
+            OrdersSelectedEvent ordersSelectedEvent = new OrdersSelectedEvent();
+            ordersSelectedEvent.getOrders().addAll(orders);
+            eventBus.post(ordersSelectedEvent);
+        }
+    }
+
+    @Subscribe
     public void placeOrders(OrdersSelectedEvent event) {
-        event.getOrders().stream()
-            .filter(order -> !portfolio.getPositions().containsKey(order.getSymbol()))
+        event.getOrders()
             .forEach(order -> {
                 try {
+                    logger.debug(order);
                     Long orderId = orderAdapter.placeOrder(order);
                     order.setId(orderId);
                     order.setStatus(Order.Status.PLACED);
-                    logger.debug(order);
+                    eventBus.post(new OrderUpdatedEvent(order));
                 } catch (Exception e) {
                     logger.error("Error placing order: " + order);
                     logger.error(e);
@@ -93,7 +114,33 @@ public class MarkedUpdatedSubscriber {
     }
 
     @Subscribe
-    public void updatePositions(PositionsCreatedEvent event) {
+    public void moveOrder(OrderUpdatedEvent event) {
+        Order order = event.getOrder();
+        switch (order.getStatus()) {
+            case PLACED:
+                portfolio.getOrders().put(order.getSymbol(), order);
+                logger.debug(order);
+                break;
+            case FILLED:
+                switch (order.getSide()) {
+                    case BUY:
+                        portfolio.getOrders().remove(order.getSymbol());
+                        portfolio.getPositions().put(order.getSymbol(), new Position(order));
+                        logger.debug(order);
+                        break;
+                    case SELL:
+                        portfolio.getOrders().remove(order.getSymbol());
+                        Position position = portfolio.getPositions().remove(order.getSymbol());
+                        counters.addToProfit(PriceUtil.addPercentage(position.getOpenPrice(), position.getChange()) - position.getOpenPrice());
+                        logger.debug(order);
+                        logger.debug(String.format("Realized profit so far: %.8f BTC", counters.getProfit()));
+                        break;
+                }
+        }
+    }
+
+    @Subscribe
+    public void updatePositions(MarketUpdatedEvent event) {
         this.portfolio.getPositions().entrySet().stream()
             .map(Map.Entry::getValue)
             .forEach(position -> {
@@ -101,34 +148,10 @@ public class MarkedUpdatedSubscriber {
                 Float currentPrice = crypto.getLatestPrice();
                 Float openPrice = position.getOpenPrice();
                 position.setChange(PriceUtil.change(openPrice, currentPrice));
-                System.out.println(String.format("Position on %s: start %.8f now %.8f -> %.4f%%",
-                        position.getSymbol(),
-                        position.getOpenPrice(),
-                        crypto.getLatestPrice(),
-                        position.getChange()));
+                logger.debug(position);
             });
 
-        this.portfolio.getPositions().entrySet()
-            .removeIf(entry ->  {
-                Position position = entry.getValue();
-                if(shouldClosePosition(position, 5f)) {
-                    logger.debug(String.format("Closed position on %s with result %.4f", position.getSymbol(), position.getChange()));
-                    Float finalPrice = PriceUtil.addPercentage(position.getOpenPrice(), position.getChange());
-                    counters.addToProfit(finalPrice - position.getOpenPrice());
-                    System.out.println("Profit balance: " + counters.getProfit() + " BTC");
-                    return true;
-                }
-                return false;
-            });
-    }
-
-
-    private Boolean shouldClosePosition(Position position, Float gain) {
-
-        if(position.getChange() > gain) {
-            return true;
-        }
-        return false;
+        eventBus.post(new PositionsUpdatedEvent());
     }
 
 }

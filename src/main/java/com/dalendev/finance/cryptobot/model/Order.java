@@ -79,6 +79,10 @@ public class Order {
         return quantity;
     }
 
+    public Float getPrice() {
+        return price;
+    }
+
     public Long getId() {
         return id;
     }
