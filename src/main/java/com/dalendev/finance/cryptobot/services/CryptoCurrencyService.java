@@ -37,8 +37,8 @@ public class CryptoCurrencyService {
 
         CryptoCurrency crypto = market.getMarket().get(priceTicker.getSymbol());
 
-        Float oldestPrice = crypto.getPricePoints().peek();
-        Float newestPrice = priceTicker.getPrice();
+        Double oldestPrice = crypto.getPricePoints().peek();
+        Double newestPrice = priceTicker.getPrice();
         crypto.getPricePoints().add(newestPrice);
         crypto.setLatestPrice(priceTicker.getPrice());
 

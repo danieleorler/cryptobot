@@ -9,31 +9,31 @@ import java.time.format.DateTimeFormatter;
 public class Position {
 
     private final String symbol;
-    private final Float openPrice;
-    private final Float closePrice;
-    private final Float amount;
+    private final Double openPrice;
+    private final Double closePrice;
+    private final Double amount;
     private final LocalDateTime openTime;
     private LocalDateTime closeTime;
-    private Float change;
+    private Double change;
 
     public Position(Order order) {
         this(order.getSymbol(), order.getPrice(), order.getQuantity(), LocalDateTime.now());
     }
 
-    public Position(String symbol, Float openPrice, Float amount, LocalDateTime openTime) {
+    public Position(String symbol, Double openPrice, Double amount, LocalDateTime openTime) {
         this.symbol = symbol;
         this.openPrice = openPrice;
         this.amount = amount;
         this.openTime = openTime;
         this.closePrice = null;
-        this.change = 0f;
+        this.change = 0d;
     }
 
-    public Float getChange() {
+    public Double getChange() {
         return change;
     }
 
-    public void setChange(Float change) {
+    public void setChange(Double change) {
         this.change = change;
     }
 
@@ -41,11 +41,11 @@ public class Position {
         return symbol;
     }
 
-    public Float getOpenPrice() {
+    public Double getOpenPrice() {
         return openPrice;
     }
 
-    public Float getClosePrice() {
+    public Double getClosePrice() {
         return closePrice;
     }
 
@@ -53,7 +53,7 @@ public class Position {
         return openTime;
     }
 
-    public Float getAmount() {
+    public Double getAmount() {
         return amount;
     }
 

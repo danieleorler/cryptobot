@@ -5,18 +5,18 @@ package com.dalendev.finance.cryptobot.singletons;
  */
 public class Counters {
 
-    private Float profit;
+    private Double profit;
 
     public Counters() {
-        profit = 0f;
+        profit = 0d;
     }
 
-    public Float addToProfit(Float delta) {
+    public Double addToProfit(Double delta) {
         profit += delta;
         return profit;
     }
 
-    public Float getProfit() {
+    public Double getProfit() {
         return profit;
     }
 }

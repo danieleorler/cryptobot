@@ -52,10 +52,10 @@ public class MarkedUpdatedSubscriber {
             .map(Map.Entry::getValue)
             .filter(crypto -> !portfolio.getPositions().containsKey(crypto.getSymbol()))
             .filter(crypto -> !portfolio.getOrders().containsKey(crypto.getSymbol()))
-            .filter(crypto -> crypto.getChange() > 1)
+            .filter(crypto -> crypto.getChange() > 5)
             .map(c -> {
-                Float stepSize = exchange.getLotFilter(c.getSymbol()).getStepSize();
-                Float quantity = PriceUtil.adjust(0.001f / c.getLatestPrice(), stepSize);
+                Double stepSize = exchange.getLotFilter(c.getSymbol()).getStepSize();
+                Double quantity = PriceUtil.adjust(0.001d / c.getLatestPrice(), stepSize);
                 return new Order.Builder()
                     .symbol(c.getSymbol())
                     .side(Order.Side.BUY)
@@ -78,7 +78,7 @@ public class MarkedUpdatedSubscriber {
     public void selectSellOrders(PositionsUpdatedEvent event) {
         List<Order> orders = portfolio.getPositions().entrySet().stream()
             .map(Map.Entry::getValue)
-            .filter(position -> position.getChange() > 1)
+            .filter(position -> position.getChange() > 5)
             .map(p -> new Order.Builder()
                 .symbol(p.getSymbol())
                 .side(Order.Side.SELL)
@@ -105,6 +105,8 @@ public class MarkedUpdatedSubscriber {
                     Long orderId = orderAdapter.placeOrder(order);
                     order.setId(orderId);
                     order.setStatus(Order.Status.PLACED);
+                    market.getMarket().get(order.getSymbol()).getPricePoints().clear();
+                    market.getMarket().get(order.getSymbol()).setChange(0d);
                     eventBus.post(new OrderUpdatedEvent(order));
                 } catch (Exception e) {
                     logger.error("Error placing order: " + order);
@@ -145,8 +147,8 @@ public class MarkedUpdatedSubscriber {
             .map(Map.Entry::getValue)
             .forEach(position -> {
                 CryptoCurrency crypto = market.getMarket().get(position.getSymbol());
-                Float currentPrice = crypto.getLatestPrice();
-                Float openPrice = position.getOpenPrice();
+                Double currentPrice = crypto.getLatestPrice();
+                Double openPrice = position.getOpenPrice();
                 position.setChange(PriceUtil.change(openPrice, currentPrice));
                 logger.debug(position);
             });

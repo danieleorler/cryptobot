@@ -8,21 +8,21 @@ import com.google.common.collect.EvictingQueue;
 public class CryptoCurrency {
 
     private final String symbol;
-    private final EvictingQueue<Float> pricePoints;
-    private Float latestPrice;
-    private Float change;
+    private final EvictingQueue<Double> pricePoints;
+    private Double latestPrice;
+    private Double change;
 
     public CryptoCurrency(String symbol) {
         this.symbol = symbol;
-        this.change = 0f;
+        this.change = 0d;
         pricePoints = EvictingQueue.create(30);
     }
 
-    public Float getChange() {
+    public Double getChange() {
         return change;
     }
 
-    public void setChange(Float change) {
+    public void setChange(Double change) {
         this.change = change;
     }
 
@@ -30,15 +30,15 @@ public class CryptoCurrency {
         return symbol;
     }
 
-    public EvictingQueue<Float> getPricePoints() {
+    public EvictingQueue<Double> getPricePoints() {
         return pricePoints;
     }
 
-    public Float getLatestPrice() {
+    public Double getLatestPrice() {
         return latestPrice;
     }
 
-    public void setLatestPrice(Float latestPrice) {
+    public void setLatestPrice(Double latestPrice) {
         this.latestPrice = latestPrice;
     }
 }

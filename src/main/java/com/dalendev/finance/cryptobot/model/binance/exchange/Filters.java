@@ -42,31 +42,31 @@ public class Filters {
 
     public static class PriceFilter extends Filter {
 
-        private Float minPrice;
-        private Float maxPrice;
-        private Float tickSize;
+        private Double minPrice;
+        private Double maxPrice;
+        private Double tickSize;
 
-        public Float getMinPrice() {
+        public Double getMinPrice() {
             return minPrice;
         }
 
-        public void setMinPrice(Float minPrice) {
+        public void setMinPrice(Double minPrice) {
             this.minPrice = minPrice;
         }
 
-        public Float getMaxPrice() {
+        public Double getMaxPrice() {
             return maxPrice;
         }
 
-        public void setMaxPrice(Float maxPrice) {
+        public void setMaxPrice(Double maxPrice) {
             this.maxPrice = maxPrice;
         }
 
-        public Float getTickSize() {
+        public Double getTickSize() {
             return tickSize;
         }
 
-        public void setTickSize(Float tickSize) {
+        public void setTickSize(Double tickSize) {
             this.tickSize = tickSize;
         }
     }
@@ -74,45 +74,45 @@ public class Filters {
     public static class LotFilter extends Filter {
 
         @JsonProperty("minQty")
-        private Float minQuantity;
+        private Double minQuantity;
         @JsonProperty("maxQty")
-        private Float maxQuantity;
-        private Float stepSize;
+        private Double maxQuantity;
+        private Double stepSize;
 
-        public Float getMinQuantity() {
+        public Double getMinQuantity() {
             return minQuantity;
         }
 
-        public void setMinQuantity(Float minQuantity) {
+        public void setMinQuantity(Double minQuantity) {
             this.minQuantity = minQuantity;
         }
 
-        public Float getMaxQuantity() {
+        public Double getMaxQuantity() {
             return maxQuantity;
         }
 
-        public void setMaxQuantity(Float maxQuantity) {
+        public void setMaxQuantity(Double maxQuantity) {
             this.maxQuantity = maxQuantity;
         }
 
-        public Float getStepSize() {
+        public Double getStepSize() {
             return stepSize;
         }
 
-        public void setStepSize(Float stepSize) {
+        public void setStepSize(Double stepSize) {
             this.stepSize = stepSize;
         }
     }
 
     public static class NotionalFilter extends Filter {
 
-        private Float minNotional;
+        private Double minNotional;
 
-        public Float getMinNotional() {
+        public Double getMinNotional() {
             return minNotional;
         }
 
-        public void setMinNotional(Float minNotional) {
+        public void setMinNotional(Double minNotional) {
             this.minNotional = minNotional;
         }
     }

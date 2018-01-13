@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class PriceTicker {
 
     private String symbol;
-    private Float price;
+    private Double price;
 
     public String getSymbol() {
         return symbol;
@@ -16,11 +16,11 @@ public class PriceTicker {
         this.symbol = symbol;
     }
 
-    public Float getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(Float price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 

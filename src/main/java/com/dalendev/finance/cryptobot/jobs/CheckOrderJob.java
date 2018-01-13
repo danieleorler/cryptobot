@@ -4,6 +4,7 @@ import com.dalendev.finance.cryptobot.adapters.rest.binance.OrderAdapter;
 import com.dalendev.finance.cryptobot.model.Order;
 import com.dalendev.finance.cryptobot.model.events.OrderUpdatedEvent;
 import com.dalendev.finance.cryptobot.singletons.Portfolio;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.eventbus.EventBus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -33,8 +34,14 @@ public class CheckOrderJob {
         portfolio.getOrders().entrySet().stream()
             .map(Map.Entry::getValue)
             .forEach(o -> {
-                // Order order = adapter.checkOrder(o);
-                o.setStatus(Order.Status.FILLED);
+                Order order = null;
+                try {
+                    order = adapter.checkOrder(o);
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                }
+                o.setStatus(order.getStatus());
+                //o.setStatus(Order.Status.FILLED);
                 eventBus.post(new OrderUpdatedEvent(o));
             });
     }

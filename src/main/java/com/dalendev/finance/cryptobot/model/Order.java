@@ -11,8 +11,10 @@ public class Order {
     private final String symbol;
     private final Side side;
     private final Type type;
-    private final Float quantity;
-    private final Float price;
+    private final Double quantity;
+    @JsonProperty("executedPrice")
+    private final Double price;
+    @JsonProperty("orderId")
     private Long id;
     private Status status;
 
@@ -54,8 +56,8 @@ public class Order {
             @JsonProperty("symbol") String symbol,
             @JsonProperty("side") Side side,
             @JsonProperty("type") Type type,
-            @JsonProperty("executedQty") Float quantity,
-            @JsonProperty("price") Float price) {
+            @JsonProperty("executedQty") Double quantity,
+            @JsonProperty("executedPrice") Double price) {
         this.symbol = symbol;
         this.side = side;
         this.type = type;
@@ -75,11 +77,11 @@ public class Order {
         return type;
     }
 
-    public Float getQuantity() {
+    public Double getQuantity() {
         return quantity;
     }
 
-    public Float getPrice() {
+    public Double getPrice() {
         return price;
     }
 
@@ -114,8 +116,8 @@ public class Order {
         private String symbol;
         private Side side;
         private Type type;
-        private Float quantity;
-        private Float price;
+        private Double quantity;
+        private Double price;
         private Long id;
         private Status status;
 
@@ -134,12 +136,12 @@ public class Order {
             return this;
         }
 
-        public Builder quantity(Float quantity) {
+        public Builder quantity(Double quantity) {
             this.quantity = quantity;
             return this;
         }
 
-        public Builder price(Float price) {
+        public Builder price(Double price) {
             this.price = price;
             return this;
         }

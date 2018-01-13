@@ -36,7 +36,7 @@ public class OrderAdapter extends BaseAdapter {
         body.add("symbol", order.getSymbol());
         body.add("side", order.getSide().name());
         body.add("type", order.getType().name());
-        body.add("quantity", Float.toString(order.getQuantity()));
+        body.add("quantity", Double.toString(order.getQuantity()));
         body.add("timestamp", Long.toString(Instant.now().toEpochMilli()));
         body.add("recvWindow", Long.toString(10000));
         body.add("newOrderRespType", "ACK");
