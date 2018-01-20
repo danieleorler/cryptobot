@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
  */
 public class BaseAdapter {
 
-    protected final String baseUrl = "https://api.binance.com";
     protected final RestTemplate restTemplate;
     protected final ObjectMapper objectMapper;
 
@@ -26,6 +25,9 @@ public class BaseAdapter {
 
     @Value("${binance.api_secret}")
     private String apiSecret;
+
+    @Value("${binance.base_url}")
+    protected String baseUrl;
 
     @Autowired
     public BaseAdapter(RestTemplate restTemplate, ObjectMapper objectMapper) {

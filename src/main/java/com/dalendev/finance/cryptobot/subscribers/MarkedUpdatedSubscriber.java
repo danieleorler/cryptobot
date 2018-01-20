@@ -1,8 +1,13 @@
 package com.dalendev.finance.cryptobot.subscribers;
 
 import com.dalendev.finance.cryptobot.adapters.rest.binance.OrderAdapter;
-import com.dalendev.finance.cryptobot.model.*;
-import com.dalendev.finance.cryptobot.model.events.*;
+import com.dalendev.finance.cryptobot.model.CryptoCurrency;
+import com.dalendev.finance.cryptobot.model.Order;
+import com.dalendev.finance.cryptobot.model.Position;
+import com.dalendev.finance.cryptobot.model.events.MarketUpdatedEvent;
+import com.dalendev.finance.cryptobot.model.events.OrderUpdatedEvent;
+import com.dalendev.finance.cryptobot.model.events.OrdersSelectedEvent;
+import com.dalendev.finance.cryptobot.model.events.PositionsUpdatedEvent;
 import com.dalendev.finance.cryptobot.singletons.Counters;
 import com.dalendev.finance.cryptobot.singletons.Exchange;
 import com.dalendev.finance.cryptobot.singletons.Market;
@@ -15,8 +20,10 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 /**
@@ -34,6 +41,7 @@ public class MarkedUpdatedSubscriber {
     private final Counters counters;
     private final OrderAdapter orderAdapter;
     private final Exchange exchange;
+    private final AtomicLong counter = new AtomicLong(0);
 
     @Autowired
     public MarkedUpdatedSubscriber(Market market, EventBus eventBus, Portfolio portfolio, Counters counters, OrderAdapter orderAdapter, Exchange exchange) {
@@ -48,37 +56,40 @@ public class MarkedUpdatedSubscriber {
 
     @Subscribe
     public void selectBuyOrders(PositionsUpdatedEvent event) {
-        List<Order> orders = this.market.getMarket().entrySet().stream()
+        CryptoCurrency buyable = this.market.getMarket().entrySet().stream()
             .map(Map.Entry::getValue)
             .filter(crypto -> !portfolio.getPositions().containsKey(crypto.getSymbol()))
             .filter(crypto -> !portfolio.getOrders().containsKey(crypto.getSymbol()))
-            .filter(crypto -> crypto.getChange() > 5)
-            .map(c -> {
-                Double stepSize = exchange.getLotFilter(c.getSymbol()).getStepSize();
-                Double quantity = PriceUtil.adjust(0.001d / c.getLatestPrice(), stepSize);
-                return new Order.Builder()
-                    .symbol(c.getSymbol())
-                    .side(Order.Side.BUY)
-                    .type(Order.Type.MARKET)
-                    .quantity(quantity)
-                    .price(c.getLatestPrice())
-                    .status(Order.Status.TO_BE_PLACED)
-                    .build();
-            })
-            .collect(Collectors.toList());
+            .filter(crypto -> shouldOpen(crypto))
+            .sorted((c1, c2) -> Double.compare(c2.getPrice30mSlope(), c1.getPrice30mSlope()))
+            .findFirst()
+            .orElse(null);
 
-        if(orders.size() > 0) {
-            OrdersSelectedEvent ordersSelectedEvent = new OrdersSelectedEvent();
-            ordersSelectedEvent.getOrders().addAll(orders);
-            eventBus.post(ordersSelectedEvent);
+        if(buyable == null) {
+            return;
         }
+
+        Double stepSize = exchange.getLotFilter(buyable.getSymbol()).getStepSize();
+        Double quantity = PriceUtil.adjust(0.001d / buyable.getLatestPrice(), stepSize);
+        Order order = new Order.Builder()
+            .symbol(buyable.getSymbol())
+            .side(Order.Side.BUY)
+            .type(Order.Type.MARKET)
+            .quantity(quantity)
+            .price(buyable.getLatestPrice())
+            .status(Order.Status.TO_BE_PLACED)
+            .build();
+
+        OrdersSelectedEvent ordersSelectedEvent = new OrdersSelectedEvent();
+        ordersSelectedEvent.getOrders().addAll(Collections.singletonList(order));
+        eventBus.post(ordersSelectedEvent);
     }
 
     @Subscribe
     public void selectSellOrders(PositionsUpdatedEvent event) {
         List<Order> orders = portfolio.getPositions().entrySet().stream()
             .map(Map.Entry::getValue)
-            .filter(position -> position.getChange() > 5)
+            .filter(position -> shouldClose(position))
             .map(p -> new Order.Builder()
                 .symbol(p.getSymbol())
                 .side(Order.Side.SELL)
@@ -105,8 +116,6 @@ public class MarkedUpdatedSubscriber {
                     Long orderId = orderAdapter.placeOrder(order);
                     order.setId(orderId);
                     order.setStatus(Order.Status.PLACED);
-                    market.getMarket().get(order.getSymbol()).getPricePoints().clear();
-                    market.getMarket().get(order.getSymbol()).setChange(0d);
                     eventBus.post(new OrderUpdatedEvent(order));
                 } catch (Exception e) {
                     logger.error("Error placing order: " + order);
@@ -127,14 +136,16 @@ public class MarkedUpdatedSubscriber {
                 switch (order.getSide()) {
                     case BUY:
                         portfolio.getOrders().remove(order.getSymbol());
-                        portfolio.getPositions().put(order.getSymbol(), new Position(order));
+                        CryptoCurrency currency = market.getMarket().get(order.getSymbol());
+                        portfolio.getPositions().put(order.getSymbol(), new Position(currency, order));
                         logger.debug(order);
                         break;
                     case SELL:
                         portfolio.getOrders().remove(order.getSymbol());
+                        market.getMarket().get(order.getSymbol()).movingAverage6h.clear();
                         Position position = portfolio.getPositions().remove(order.getSymbol());
+                        logger.debug(position);
                         counters.addToProfit(PriceUtil.addPercentage(position.getOpenPrice(), position.getChange()) - position.getOpenPrice());
-                        logger.debug(order);
                         logger.debug(String.format("Realized profit so far: %.8f BTC", counters.getProfit()));
                         break;
                 }
@@ -150,10 +161,44 @@ public class MarkedUpdatedSubscriber {
                 Double currentPrice = crypto.getLatestPrice();
                 Double openPrice = position.getOpenPrice();
                 position.setChange(PriceUtil.change(openPrice, currentPrice));
+                position.getMADiffs30m().add(crypto.getMADiff());
+
+                Double thresholdMADiff = crypto.getMADiff()/2;
+
+                if(thresholdMADiff > position.getThresholdMADiff()) {
+                    position.setThresholdMADiff(thresholdMADiff);
+                }
                 logger.debug(position);
             });
 
         eventBus.post(new PositionsUpdatedEvent());
+    }
+
+    private boolean shouldOpen(CryptoCurrency currency) {
+        Double percentage = currency.getMADiff();
+
+        if(percentage > 1 && currency.getPrice30mSlope() > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean shouldClose(Position position) {
+
+        boolean shouldClose = position.getChange() > 100 ||
+                position.getThresholdMADiff() > position.getCurrency().getMADiff();
+
+        if(shouldClose) {
+            logger.debug(String.format("%d,%.8f,%.8f,%.8f,%.8f,%.2f",
+                    counter.incrementAndGet(),
+                    position.getCurrency().movingAverage6h.getMean(),
+                    position.getCurrency().movingAverage24h.getMean(),
+                    position.getThresholdMADiff(),
+                    position.getCurrency().getMADiff(),
+                    position.getChange()));
+        }
+
+        return shouldClose;
     }
 
 }

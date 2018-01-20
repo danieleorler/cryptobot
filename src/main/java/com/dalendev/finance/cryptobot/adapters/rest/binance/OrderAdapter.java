@@ -38,7 +38,7 @@ public class OrderAdapter extends BaseAdapter {
         body.add("type", order.getType().name());
         body.add("quantity", Double.toString(order.getQuantity()));
         body.add("timestamp", Long.toString(Instant.now().toEpochMilli()));
-        body.add("recvWindow", Long.toString(10000));
+        body.add("recvWindow", Long.toString(100000));
         body.add("newOrderRespType", "ACK");
 
         RequestEntity<MultiValueMap<String, String>> request = RequestEntity

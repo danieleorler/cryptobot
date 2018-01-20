@@ -1,5 +1,8 @@
 package com.dalendev.finance.cryptobot.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.collect.EvictingQueue;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -8,25 +11,33 @@ import java.time.format.DateTimeFormatter;
  */
 public class Position {
 
-    private final String symbol;
+    private final CryptoCurrency currency;
     private final Double openPrice;
     private final Double closePrice;
     private final Double amount;
     private final LocalDateTime openTime;
     private LocalDateTime closeTime;
     private Double change;
+    private Double thresholdMADiff;
+    private Double openMADiff;
+    @JsonIgnore
+    private final EvictingQueue<Double> mADiffs30m;
 
-    public Position(Order order) {
-        this(order.getSymbol(), order.getPrice(), order.getQuantity(), LocalDateTime.now());
+    public Position(CryptoCurrency currency, Order order) {
+        this(currency, order.getPrice(), order.getQuantity(), LocalDateTime.now(), currency.getMADiff());
     }
 
-    public Position(String symbol, Double openPrice, Double amount, LocalDateTime openTime) {
-        this.symbol = symbol;
+    public Position(CryptoCurrency currency, Double openPrice, Double amount, LocalDateTime openTime, Double openMADiff) {
+        this.currency = currency;
         this.openPrice = openPrice;
         this.amount = amount;
         this.openTime = openTime;
         this.closePrice = null;
         this.change = 0d;
+        this.thresholdMADiff = 0.0;
+        this.openMADiff = openMADiff;
+        this.mADiffs30m = EvictingQueue.create(30);
+        this.mADiffs30m.add(openMADiff);
     }
 
     public Double getChange() {
@@ -38,7 +49,7 @@ public class Position {
     }
 
     public String getSymbol() {
-        return symbol;
+        return currency.getSymbol();
     }
 
     public Double getOpenPrice() {
@@ -57,6 +68,14 @@ public class Position {
         return amount;
     }
 
+    public CryptoCurrency getCurrency() {
+        return currency;
+    }
+
+    public Double getThresholdMADiff() {
+        return thresholdMADiff;
+    }
+
     public LocalDateTime getCloseTime() {
         return closeTime;
     }
@@ -65,13 +84,26 @@ public class Position {
         this.closeTime = closeTime;
     }
 
+    public EvictingQueue<Double> getMADiffs30m() {
+        return mADiffs30m;
+    }
+
+    public void setThresholdMADiff(Double mADiffSlope) {
+        this.thresholdMADiff = mADiffSlope;
+    }
+
+    public Double getOpenMADiff() {
+        return openMADiff;
+    }
+
     @Override
     public String toString() {
-        return String.format("%.8f %s opened at %s at price %.8f current change %.2f%%",
+        return String.format("%.8f %s opened at %s at price %.8f current change %.2f%%, MADiffSlope %.8f",
             amount,
-            symbol,
+            currency.getSymbol(),
             openTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
             openPrice,
-            change);
+            change,
+            thresholdMADiff);
     }
 }

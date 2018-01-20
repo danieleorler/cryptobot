@@ -33,8 +33,14 @@ public class PriceTickerJob {
         this.eventBus = eventBus;
     }
 
-    @Scheduled(initialDelay = 10000, fixedDelay = 60000)
+    @Scheduled(initialDelay = 60000, fixedDelay = 60000)
     public void samplePrice() {
+        if(cryptoCurrencyService.isMarketReady()) {
+            sampleMarket();
+        }
+    }
+
+    private void sampleMarket() {
         try {
             List<PriceTicker> priceTickers = this.priceTickerAdapter.getPriceTickers();
 

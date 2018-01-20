@@ -1,6 +1,6 @@
 package com.dalendev.finance.cryptobot.util;
 
-import com.dalendev.finance.cryptobot.model.CryptoCurrency;
+import com.google.common.collect.EvictingQueue;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 /**
@@ -16,16 +16,20 @@ public class PriceUtil {
         return price + (price * percentage/100);
     }
 
+    public static Double getPercentage(Double price, Double amount) {
+        return (amount / price) * 100;
+    }
+
     public static Double adjust(Double amount, Double lot) {
         double reminder = amount % lot;
         return reminder > 0f ? lot - reminder + amount : amount;
     }
 
-    public static Double slope(CryptoCurrency currency) {
+    public static Double slope(EvictingQueue<Double> dataPoints) {
         SimpleRegression regression = new SimpleRegression();
         double x = 0;
 
-        for(Double y : currency.getPricePoints()) {
+        for(Double y : dataPoints) {
             regression.addData(x++, y);
         }
 

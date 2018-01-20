@@ -8,6 +8,14 @@ public class PriceTicker {
     private String symbol;
     private Double price;
 
+    public PriceTicker() {
+    }
+
+    public PriceTicker(String symbol, Double price) {
+        this.symbol = symbol;
+        this.price = price;
+    }
+
     public String getSymbol() {
         return symbol;
     }

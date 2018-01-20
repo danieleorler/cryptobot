@@ -1,9 +1,10 @@
 package com.dalendev.finance.cryptobot.services;
 
 import com.dalendev.finance.cryptobot.model.CryptoCurrency;
-import com.dalendev.finance.cryptobot.singletons.Market;
 import com.dalendev.finance.cryptobot.model.binance.PriceTicker;
-import com.dalendev.finance.cryptobot.util.PriceUtil;
+import com.dalendev.finance.cryptobot.singletons.Market;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CryptoCurrencyService {
+
+    protected Log logger = LogFactory.getLog(CryptoCurrencyService.class);
 
     private final Market market;
 
@@ -24,7 +27,9 @@ public class CryptoCurrencyService {
     public void updateMarket(PriceTicker priceTicker) {
 
         if (market.getMarket().containsKey(priceTicker.getSymbol())) {
-            updatePriceHistory(priceTicker);
+            CryptoCurrency crypto = market.getMarket().get(priceTicker.getSymbol());
+            crypto.addPriceSample(priceTicker.getPrice());
+            crypto.setLatestPrice(priceTicker.getPrice());
         } else {
             CryptoCurrency newCrypto = new CryptoCurrency(priceTicker.getSymbol());
             newCrypto.getPricePoints().add(priceTicker.getPrice());
@@ -33,20 +38,13 @@ public class CryptoCurrencyService {
         }
     }
 
-    private void updatePriceHistory(PriceTicker priceTicker) {
+    public void setMarketReady() {
+        market.setMarketReady(true);
+        logger.debug("Market is ready");
+    }
 
-        CryptoCurrency crypto = market.getMarket().get(priceTicker.getSymbol());
-
-        Double oldestPrice = crypto.getPricePoints().peek();
-        Double newestPrice = priceTicker.getPrice();
-        crypto.getPricePoints().add(newestPrice);
-        crypto.setLatestPrice(priceTicker.getPrice());
-
-        if(oldestPrice == null) {
-            return;
-        }
-
-        crypto.setChange(PriceUtil.change(oldestPrice, newestPrice));
+    public boolean isMarketReady() {
+        return market.isMarketReady();
     }
 
 }

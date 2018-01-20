@@ -1,0 +1,25 @@
+<configuration debug="false">
+    <appender name="STDERR" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.err</target>
+        <encoder>
+            <pattern>%date %level %logger{20} %msg%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
+    </appender>
+
+    <appender name="ASYNC_STDERR" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>128</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <appender-ref ref="STDERR" />
+    </appender>
+
+    <logger name="org.mockserver" level="WARN"/>
+    <logger name="io.netty.handler.ssl.SslHandler" level="WARN"/>
+
+    <root level="WARN">
+        <appender-ref ref="ASYNC_STDERR"/>
+    </root>
+
+</configuration>
