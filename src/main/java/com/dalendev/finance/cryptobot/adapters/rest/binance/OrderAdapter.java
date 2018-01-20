@@ -42,7 +42,7 @@ public class OrderAdapter extends BaseAdapter {
         body.add("newOrderRespType", "ACK");
 
         RequestEntity<MultiValueMap<String, String>> request = RequestEntity
-            .post(new URI(this.baseUrl + "/api/v3/order/test"))
+            .post(new URI(this.baseUrl + "/api/v3/order"))
             .contentType(MediaType.APPLICATION_FORM_URLENCODED)
             .accept(MediaType.APPLICATION_JSON)
             .header("X-MBX-APIKEY", this.apiKey)

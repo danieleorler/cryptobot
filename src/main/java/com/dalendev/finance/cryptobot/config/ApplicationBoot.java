@@ -32,6 +32,7 @@ public class ApplicationBoot implements ApplicationListener<ApplicationReadyEven
 
         exchangeInfo.getSymbols().stream()
             .map(Symbol::getSymbol)
+            .sorted()
             .filter(symbol -> symbol.endsWith("BTC"))
             .forEach(symbol -> adapter.importSymbolPriceHistory(symbol).stream()
                     .map(price -> new PriceTicker(symbol, price))
