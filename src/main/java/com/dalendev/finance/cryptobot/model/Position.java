@@ -24,7 +24,13 @@ public class Position {
     private final EvictingQueue<Double> mADiffs30m;
 
     public Position(CryptoCurrency currency, Order order) {
-        this(currency, order.getPrice(), order.getQuantity(), LocalDateTime.now(), currency.getMADiff());
+        this(
+                currency,
+                order.getPrice(),
+                order.getQuantity(),
+                LocalDateTime.now(),
+                currency.getAnalysis().getMovingAverageDiff()
+        );
     }
 
     public Position(CryptoCurrency currency, Double openPrice, Double amount, LocalDateTime openTime, Double openMADiff) {

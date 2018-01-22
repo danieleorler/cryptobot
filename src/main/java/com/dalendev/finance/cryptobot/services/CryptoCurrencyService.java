@@ -32,7 +32,7 @@ public class CryptoCurrencyService {
             crypto.setLatestPrice(priceTicker.getPrice());
         } else {
             CryptoCurrency newCrypto = new CryptoCurrency(priceTicker.getSymbol());
-            newCrypto.getPricePoints().add(priceTicker.getPrice());
+            newCrypto.addPriceSample(priceTicker.getPrice());
             newCrypto.setLatestPrice(priceTicker.getPrice());
             market.getMarket().put(newCrypto.getSymbol(), newCrypto);
         }

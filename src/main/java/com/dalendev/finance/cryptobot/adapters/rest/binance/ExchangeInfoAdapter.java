@@ -50,12 +50,12 @@ public class ExchangeInfoAdapter extends BaseAdapter {
 
         logger.debug("Importing prices for " + symbol);
 
-        LocalDateTime from = LocalDateTime.now().minusHours(25);
+        LocalDateTime from = LocalDateTime.now().minusHours(48);
         LocalDateTime stop = LocalDateTime.now().plusHours(1);
         LocalDateTime to = from.plusMinutes(500);
         List<Double> prices = new ArrayList<>();
 
-        while(to.isBefore(stop)) {
+        while(from.isBefore(stop)) {
             List<Double> list = getPricesForPeriod(
                     symbol,
                     from.toInstant(ZoneOffset.UTC).toEpochMilli(),

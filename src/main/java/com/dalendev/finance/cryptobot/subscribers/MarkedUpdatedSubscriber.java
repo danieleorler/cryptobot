@@ -61,7 +61,7 @@ public class MarkedUpdatedSubscriber {
             .filter(crypto -> !portfolio.getPositions().containsKey(crypto.getSymbol()))
             .filter(crypto -> !portfolio.getOrders().containsKey(crypto.getSymbol()))
             .filter(crypto -> shouldOpen(crypto))
-            .sorted((c1, c2) -> Double.compare(c2.getPrice30mSlope(), c1.getPrice30mSlope()))
+            .sorted((c1, c2) -> Double.compare(c2.getAnalysis().getPrice30mSlope(), c1.getAnalysis().getPrice30mSlope()))
             .findFirst()
             .orElse(null);
 
@@ -142,7 +142,6 @@ public class MarkedUpdatedSubscriber {
                         break;
                     case SELL:
                         portfolio.getOrders().remove(order.getSymbol());
-                        market.getMarket().get(order.getSymbol()).movingAverage6h.clear();
                         Position position = portfolio.getPositions().remove(order.getSymbol());
                         logger.debug(position);
                         counters.addToProfit(PriceUtil.addPercentage(position.getOpenPrice(), position.getChange()) - position.getOpenPrice());
@@ -161,9 +160,8 @@ public class MarkedUpdatedSubscriber {
                 Double currentPrice = crypto.getLatestPrice();
                 Double openPrice = position.getOpenPrice();
                 position.setChange(PriceUtil.change(openPrice, currentPrice));
-                position.getMADiffs30m().add(crypto.getMADiff());
 
-                Double thresholdMADiff = crypto.getMADiff()/2;
+                Double thresholdMADiff = crypto.getAnalysis().getMovingAverageDiff()/2;
 
                 if(thresholdMADiff > position.getThresholdMADiff()) {
                     position.setThresholdMADiff(thresholdMADiff);
@@ -175,9 +173,9 @@ public class MarkedUpdatedSubscriber {
     }
 
     private boolean shouldOpen(CryptoCurrency currency) {
-        Double percentage = currency.getMADiff();
+        Double percentage = currency.getAnalysis().getMovingAverageDiff();
 
-        if(percentage > 1 && currency.getPrice30mSlope() > 0) {
+        if(percentage > 1 && currency.getAnalysis().getPrice30mSlope() > 0) {
             return true;
         }
         return false;
@@ -185,20 +183,8 @@ public class MarkedUpdatedSubscriber {
 
     private boolean shouldClose(Position position) {
 
-        boolean shouldClose = position.getChange() > 100 ||
-                position.getThresholdMADiff() > position.getCurrency().getMADiff();
-
-        if(shouldClose) {
-            logger.debug(String.format("%d,%.8f,%.8f,%.8f,%.8f,%.2f",
-                    counter.incrementAndGet(),
-                    position.getCurrency().movingAverage6h.getMean(),
-                    position.getCurrency().movingAverage24h.getMean(),
-                    position.getThresholdMADiff(),
-                    position.getCurrency().getMADiff(),
-                    position.getChange()));
-        }
-
-        return shouldClose;
+        return position.getChange() > 100 ||
+                position.getThresholdMADiff() > position.getCurrency().getAnalysis().getMovingAverageDiff();
     }
 
 }
