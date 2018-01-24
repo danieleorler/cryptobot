@@ -1,5 +1,7 @@
 package com.dalendev.finance.cryptobot.util;
 
+import com.dalendev.finance.cryptobot.model.Fill;
+import com.dalendev.finance.cryptobot.model.Order;
 import com.google.common.collect.EvictingQueue;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
@@ -34,6 +36,18 @@ public class PriceUtil {
         }
 
         return regression.getSlope();
+    }
+
+    public static double getRealPrice(Order order) {
+        double sumQuantity = 0;
+        double sumWeights = 0;
+
+        for(Fill fill : order.getFills()) {
+            sumQuantity += fill.getQuantity();
+            sumWeights += fill.getPrice() * fill.getQuantity();
+        }
+
+        return sumWeights/sumQuantity;
     }
 
 }
