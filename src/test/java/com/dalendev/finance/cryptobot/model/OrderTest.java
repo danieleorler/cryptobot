@@ -29,4 +29,10 @@ public class OrderTest {
         assertEquals(0.00059010, price, 0.00000001);
     }
 
+    @Test
+    public void deserializeEmptyOrder() throws Exception {
+        Order order = TestUtil.jsonStringToObject("{}", Order.class);
+        assertNull(order.getSymbol());
+    }
+
 }

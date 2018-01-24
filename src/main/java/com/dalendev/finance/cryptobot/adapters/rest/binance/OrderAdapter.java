@@ -1,7 +1,7 @@
 package com.dalendev.finance.cryptobot.adapters.rest.binance;
 
+import com.dalendev.finance.cryptobot.model.Fill;
 import com.dalendev.finance.cryptobot.model.Order;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -14,8 +14,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.time.Instant;
 
 /**
@@ -30,7 +28,7 @@ public class OrderAdapter extends BaseAdapter {
         super(restTemplate, objectMapper);
     }
 
-    public Long placeOrder(Order order) throws URISyntaxException, IOException {
+    public Order placeOrder(Order order) throws IOException {
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("symbol", order.getSymbol());
@@ -42,22 +40,25 @@ public class OrderAdapter extends BaseAdapter {
         body.add("newOrderRespType", "FULL");
 
         RequestEntity<MultiValueMap<String, String>> request = RequestEntity
-            .post(new URI(this.baseUrl + "/api/v3/order"))
+            .post(UriComponentsBuilder.fromHttpUrl(this.baseUrl + "/api/v3/order/test").build().toUri())
             .contentType(MediaType.APPLICATION_FORM_URLENCODED)
             .accept(MediaType.APPLICATION_JSON)
             .header("X-MBX-APIKEY", this.apiKey)
             .body(sign(body));
 
-        ResponseEntity<String> response = restTemplate.exchange(request, String.class);
+        ResponseEntity<Order> response = restTemplate.exchange(request, Order.class);
 
-        JsonNode json = objectMapper.readValue(response.getBody(), JsonNode.class);
-
-        // test order response is empty that's why we return -1
-        if(json.has("orderId")) {
-            return json.get("orderId").longValue();
-        } else {
-            return (long) -1;
+        if(response.getBody().getSymbol() != null) {
+            return response.getBody();
         }
+
+        // in test mode binance doesn't return a body
+        // so we just return the order passed to this method
+        Fill fakeFill = new Fill(order.getPrice(), order.getQuantity());
+        order.setStatus(Order.Status.FILLED);
+        order.setId(-1L);
+        order.getFills().add(fakeFill);
+        return order;
     }
 
     public Order checkOrder(Order order) {

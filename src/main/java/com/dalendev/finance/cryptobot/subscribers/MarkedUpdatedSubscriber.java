@@ -112,10 +112,8 @@ public class MarkedUpdatedSubscriber {
         event.getOrders()
             .forEach(order -> {
                 try {
-                    logger.debug(order);
-                    Long orderId = orderAdapter.placeOrder(order);
-                    order.setId(orderId);
-                    order.setStatus(Order.Status.PLACED);
+                    Order orderResult = orderAdapter.placeOrder(order);
+                    logger.debug(orderResult);
                     eventBus.post(new OrderUpdatedEvent(order));
                 } catch (Exception e) {
                     logger.error("Error placing order: " + order);
