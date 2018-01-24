@@ -11,10 +11,10 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class ConfigController {
 
-    @Autowired
+
     private final ConfigService configService;
 
-
+    @Autowired
     public ConfigController(ConfigService configService) {
         this.configService = configService;
     }
