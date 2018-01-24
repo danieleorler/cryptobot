@@ -31,4 +31,12 @@ public class TestUtil {
         }
     }
 
+    public static <T> T jsonStringToObject(String json, Class<T> valueType) {
+        try {
+            return objectMapper.readValue(json, valueType);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
 }

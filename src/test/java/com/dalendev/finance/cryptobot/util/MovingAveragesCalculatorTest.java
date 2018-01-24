@@ -50,14 +50,14 @@ public class MovingAveragesCalculatorTest {
         data.add(4.0);
         data.add(5.0);
         data.add(6.0);
-        assertEquals(3.0, ma.evaluateExponential(5, data.toArray()));
+        assertEquals(13.0, ma.evaluateExponential(5, data.toArray()));
     }
 
     @Test
     public void exponentialWithRealData() throws Exception {
 
         Double[] prices = TestUtil.jsonFileToObject("ETC.json", Double[].class);
-        assertEquals(0.003, ma.evaluateExponential(60, prices));
+        assertEquals(0.003, ma.evaluateExponential(60, prices), 0.001);
     }
 
 }

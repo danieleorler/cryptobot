@@ -46,7 +46,7 @@ public class MovingAveragesCalculator implements UnivariateStatistic {
 
     public double evaluateExponential(int periodSpan, Object[] data) {
         double[] closingPeriodsPrices = closingPeriodsPrices(periodSpan, data);
-        double multiplier = 8.0 / (closingPeriodsPrices.length + 1.0);
+        double multiplier = 10.0 / (closingPeriodsPrices.length + 1.0);
         double currentEma = closingPeriodsPrices[0];
         double ema = ema(multiplier, currentEma, Arrays.copyOfRange(closingPeriodsPrices, 1, closingPeriodsPrices.length));
         return ema;

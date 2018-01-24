@@ -6,6 +6,8 @@ import com.google.common.collect.EvictingQueue;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import static com.dalendev.finance.cryptobot.util.PriceUtil.getRealPrice;
+
 /**
  * @author daniele.orler
  */
@@ -24,9 +26,10 @@ public class Position {
     private final EvictingQueue<Double> mADiffs30m;
 
     public Position(CryptoCurrency currency, Order order) {
+
         this(
                 currency,
-                order.getPrice(),
+                getRealPrice(order),
                 order.getQuantity(),
                 LocalDateTime.now(),
                 currency.getAnalysis().getMovingAverageDiff()

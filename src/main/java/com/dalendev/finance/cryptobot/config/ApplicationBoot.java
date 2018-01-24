@@ -30,7 +30,7 @@ public class ApplicationBoot implements ApplicationListener<ApplicationReadyEven
 
         ExchangeInfo exchangeInfo = adapter.getExchangeInfo();
 
-        exchangeInfo.getSymbols().stream()
+        exchangeInfo.getSymbols().stream().parallel()
             .map(Symbol::getSymbol)
             .sorted()
             .filter(symbol -> symbol.endsWith("BTC"))

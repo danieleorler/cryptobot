@@ -1,11 +1,16 @@
 package com.dalendev.finance.cryptobot.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author daniele.orler
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Order {
 
     private final String symbol;
@@ -17,6 +22,7 @@ public class Order {
     @JsonProperty("orderId")
     private Long id;
     private Status status;
+    private List<Fill> fills;
 
     public enum Status {
         TO_BE_PLACED,
@@ -63,6 +69,7 @@ public class Order {
         this.type = type;
         this.quantity = quantity;
         this.price = price;
+        this.fills = new ArrayList<>();
     }
 
     public String getSymbol() {
@@ -99,6 +106,14 @@ public class Order {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public List<Fill> getFills() {
+        return fills;
+    }
+
+    public void setFills(List<Fill> fills) {
+        this.fills = fills;
     }
 
     @Override

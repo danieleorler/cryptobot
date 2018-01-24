@@ -1,0 +1,22 @@
+{
+  "symbol": "KMDBTC",
+  "orderId": 4403390,
+  "clientOrderId": "6aGOxOf3DMLSyKLXVZpdvU",
+  "transactTime": 1516753877311,
+  "price": "0.00000000",
+  "origQty": "1.65000000",
+  "executedQty": "1.65000000",
+  "status": "FILLED",
+  "timeInForce": "GTC",
+  "type": "MARKET",
+  "side": "SELL",
+  "fills": [
+    {
+      "price": "0.00059010",
+      "qty": "1.65000000",
+      "commission": "0.00039933",
+      "commissionAsset": "BNB",
+      "tradeId": 661462
+    }
+  ]
+}

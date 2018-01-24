@@ -1,5 +1,6 @@
 package com.dalendev.finance.cryptobot.e2e;
 
+import com.dalendev.finance.cryptobot.model.Fill;
 import com.dalendev.finance.cryptobot.model.Order;
 import com.dalendev.finance.cryptobot.model.binance.PriceTicker;
 import com.dalendev.finance.cryptobot.model.binance.exchange.ExchangeInfo;
@@ -100,6 +101,9 @@ public class BinanceMock {
                     .price(responses.element().getPrice())
                     .build();
                 order.setId(orderId.incrementAndGet());
+
+                Fill fill = new Fill(responses.element().getPrice(), Double.parseDouble(parameters.get("quantity")));
+                order.getFills().add(fill);
 
                 orders.put(order.getId(), order);
 
