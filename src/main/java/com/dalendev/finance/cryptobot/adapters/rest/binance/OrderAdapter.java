@@ -4,6 +4,7 @@ import com.dalendev.finance.cryptobot.model.Fill;
 import com.dalendev.finance.cryptobot.model.Order;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -23,12 +24,15 @@ import java.time.Instant;
 @Component
 public class OrderAdapter extends BaseAdapter {
 
+    @Value("${binance.order_path}")
+    private String orderPath;
+
     @Autowired
     public OrderAdapter(RestTemplate restTemplate, ObjectMapper objectMapper) {
         super(restTemplate, objectMapper);
     }
 
-    public Order placeOrder(Order order) throws IOException {
+    public Order placeOrder(Order order) {
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("symbol", order.getSymbol());
@@ -40,7 +44,7 @@ public class OrderAdapter extends BaseAdapter {
         body.add("newOrderRespType", "FULL");
 
         RequestEntity<MultiValueMap<String, String>> request = RequestEntity
-            .post(UriComponentsBuilder.fromHttpUrl(this.baseUrl + "/api/v3/order").build().toUri())
+            .post(UriComponentsBuilder.fromHttpUrl(this.baseUrl + this.orderPath).build().toUri())
             .contentType(MediaType.APPLICATION_FORM_URLENCODED)
             .accept(MediaType.APPLICATION_JSON)
             .header("X-MBX-APIKEY", this.apiKey)
@@ -68,8 +72,7 @@ public class OrderAdapter extends BaseAdapter {
         body.add("timestamp", Long.toString(Instant.now().toEpochMilli()));
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(this.baseUrl + "/api/v3/order");
-        sign(body).toSingleValueMap().entrySet()
-            .forEach(param -> builder.queryParam(param.getKey(), param.getValue()));
+        sign(body).toSingleValueMap().forEach((key, value) -> builder.queryParam(key, value));
 
         RequestEntity<Void> request = RequestEntity
             .get(builder.build().encode().toUri())

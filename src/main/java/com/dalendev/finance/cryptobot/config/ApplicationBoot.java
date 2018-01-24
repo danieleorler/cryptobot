@@ -6,6 +6,7 @@ import com.dalendev.finance.cryptobot.model.binance.exchange.ExchangeInfo;
 import com.dalendev.finance.cryptobot.model.binance.exchange.Symbol;
 import com.dalendev.finance.cryptobot.services.CryptoCurrencyService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,9 @@ public class ApplicationBoot implements ApplicationListener<ApplicationReadyEven
 
     private final ExchangeInfoAdapter adapter;
     private final CryptoCurrencyService currencyService;
+
+    @Value("${maxExchangeSymbols:99999}")
+    private Integer maxExchangeSymbols;
 
     @Autowired
     public ApplicationBoot(ExchangeInfoAdapter adapter, CryptoCurrencyService currencyService) {
@@ -34,9 +38,10 @@ public class ApplicationBoot implements ApplicationListener<ApplicationReadyEven
             .map(Symbol::getSymbol)
             .sorted()
             .filter(symbol -> symbol.endsWith("BTC"))
+            .limit(maxExchangeSymbols)
             .forEach(symbol -> adapter.importSymbolPriceHistory(symbol).stream()
                     .map(price -> new PriceTicker(symbol, price))
-                    .forEach(pt -> currencyService.updateMarket(pt))
+                    .forEach(currencyService::updateMarket)
             );
 
         currencyService.setMarketReady();
