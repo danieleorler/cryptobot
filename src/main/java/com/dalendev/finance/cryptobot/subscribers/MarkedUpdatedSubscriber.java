@@ -8,6 +8,7 @@ import com.dalendev.finance.cryptobot.model.events.MarketUpdatedEvent;
 import com.dalendev.finance.cryptobot.model.events.OrderUpdatedEvent;
 import com.dalendev.finance.cryptobot.model.events.OrdersSelectedEvent;
 import com.dalendev.finance.cryptobot.model.events.PositionsUpdatedEvent;
+import com.dalendev.finance.cryptobot.services.ConfigService;
 import com.dalendev.finance.cryptobot.singletons.Counters;
 import com.dalendev.finance.cryptobot.singletons.Exchange;
 import com.dalendev.finance.cryptobot.singletons.Market;
@@ -42,15 +43,17 @@ public class MarkedUpdatedSubscriber {
     private final OrderAdapter orderAdapter;
     private final Exchange exchange;
     private final AtomicLong counter = new AtomicLong(0);
+    private final ConfigService configService;
 
     @Autowired
-    public MarkedUpdatedSubscriber(Market market, EventBus eventBus, Portfolio portfolio, Counters counters, OrderAdapter orderAdapter, Exchange exchange) {
+    public MarkedUpdatedSubscriber(Market market, EventBus eventBus, Portfolio portfolio, Counters counters, OrderAdapter orderAdapter, Exchange exchange, ConfigService configService) {
         this.market = market;
         this.portfolio = portfolio;
         this.eventBus = eventBus;
         this.counters = counters;
         this.orderAdapter = orderAdapter;
         this.exchange = exchange;
+        this.configService = configService;
         eventBus.register(this);
     }
 
@@ -70,7 +73,7 @@ public class MarkedUpdatedSubscriber {
         }
 
         Double stepSize = exchange.getLotFilter(buyable.getSymbol()).getStepSize();
-        Double quantity = PriceUtil.adjust(0.001d / buyable.getLatestPrice(), stepSize);
+        Double quantity = PriceUtil.adjust(configService.getMaxOrderPrice() / buyable.getLatestPrice(), stepSize);
         Order order = new Order.Builder()
             .symbol(buyable.getSymbol())
             .side(Order.Side.BUY)
@@ -181,7 +184,7 @@ public class MarkedUpdatedSubscriber {
 
     private boolean shouldClose(Position position) {
 
-        return position.getChange() > 100 ||
+        return position.getChange() > configService.getTakeProfit() ||
                 position.getThresholdMADiff() > position.getCurrency().getAnalysis().getMovingAverageDiff();
     }
 

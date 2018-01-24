@@ -10,6 +10,7 @@ import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
@@ -21,6 +22,7 @@ import java.util.concurrent.Executors;
  */
 @SpringBootApplication
 @EnableScheduling
+@EnableConfigurationProperties
 public class App {
 
     public static void main(final String[] args) {
