@@ -40,7 +40,7 @@ public class OrderAdapter extends BaseAdapter {
         body.add("newOrderRespType", "FULL");
 
         RequestEntity<MultiValueMap<String, String>> request = RequestEntity
-            .post(UriComponentsBuilder.fromHttpUrl(this.baseUrl + "/api/v3/order/test").build().toUri())
+            .post(UriComponentsBuilder.fromHttpUrl(this.baseUrl + "/api/v3/order").build().toUri())
             .contentType(MediaType.APPLICATION_FORM_URLENCODED)
             .accept(MediaType.APPLICATION_JSON)
             .header("X-MBX-APIKEY", this.apiKey)
