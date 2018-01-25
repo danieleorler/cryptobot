@@ -59,4 +59,8 @@ public class ConfigService {
     public Double getMaxOrderPrice() {
         return getAsDouble("maxOrderPrice");
     }
+
+    public Integer getMaxOrderPositions() {
+        return Integer.parseInt(getProperty("maxOrderPositions"));
+    }
 }
