@@ -1,6 +1,9 @@
 package com.dalendev.finance.cryptobot.util;
 
+import com.dalendev.finance.cryptobot.services.ConfigService;
 import org.apache.commons.math3.stat.descriptive.UnivariateStatistic;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,14 +13,20 @@ import java.util.stream.IntStream;
 /**
  * @author daniele.orler
  */
-public class MovingAveragesCalculator implements UnivariateStatistic {
+@Component
+public class MovingAveragesCalculator {
 
-    @Override
+    private final ConfigService configService;
+
+    @Autowired
+    public MovingAveragesCalculator(ConfigService configService) {
+        this.configService = configService;
+    }
+
     public double evaluate(double[] data) {
         return evaluate(data, 0, data.length);
     }
 
-    @Override
     public double evaluate(double[] data, int begin, int periods) {
         double wma = 0;
         int multiplier = 1;
@@ -46,7 +55,7 @@ public class MovingAveragesCalculator implements UnivariateStatistic {
 
     public double evaluateExponential(int periodSpan, Object[] data) {
         double[] closingPeriodsPrices = closingPeriodsPrices(periodSpan, data);
-        double multiplier = 10.0 / (closingPeriodsPrices.length + 1.0);
+        double multiplier = configService.getExponentialFactor() / (closingPeriodsPrices.length + 1.0);
         double currentEma = closingPeriodsPrices[0];
         double ema = ema(multiplier, currentEma, Arrays.copyOfRange(closingPeriodsPrices, 1, closingPeriodsPrices.length));
         return ema;
@@ -95,7 +104,6 @@ public class MovingAveragesCalculator implements UnivariateStatistic {
         return toReturn;
     }
 
-    @Override
     public UnivariateStatistic copy() {
         return null;
     }

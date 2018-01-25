@@ -17,17 +17,19 @@ public class Analysis {
     private final EvictingQueue<Double> EMA6h;
     private final EvictingQueue<Double> price30m;
 
-    private final MovingAveragesCalculator movingAveragesCalculator = new MovingAveragesCalculator();
+    @JsonIgnore
+    private final MovingAveragesCalculator movingAveragesCalculator;
 
     private Double price30mSlope = 0.0;
     private Double movingAverageDiff = 0.0;
 
-    public Analysis() {
+    public Analysis(MovingAveragesCalculator movingAveragesCalculator) {
         EMA6h = EvictingQueue.create(24 * 60);
         EMA24h = EvictingQueue.create(24 * 60);
         prices6 = EvictingQueue.create(6 * 60);
         prices24 = EvictingQueue.create(24 * 60);
         price30m = EvictingQueue.create(30);
+        this.movingAveragesCalculator = movingAveragesCalculator;
     }
 
     public void addPrice(double price) {
