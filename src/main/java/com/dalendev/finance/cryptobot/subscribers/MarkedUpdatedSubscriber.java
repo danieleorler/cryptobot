@@ -59,6 +59,10 @@ public class MarkedUpdatedSubscriber {
 
     @Subscribe
     public void selectBuyOrders(PositionsUpdatedEvent event) {
+        if (portfolio.getPositions().size() >= configService.getMaxOrderPositions())  {
+            return;
+        }
+
         CryptoCurrency buyable = this.market.getMarket().entrySet().stream()
             .map(Map.Entry::getValue)
             .filter(crypto -> !portfolio.getPositions().containsKey(crypto.getSymbol()))
