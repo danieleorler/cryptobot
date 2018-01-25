@@ -16,6 +16,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.Instant;
 
+import static com.dalendev.finance.cryptobot.util.PriceUtil.getRealPrice;
+
 /**
  * @author daniele.orler
  */
@@ -52,6 +54,8 @@ public class OrderAdapter extends BaseAdapter {
         ResponseEntity<Order> response = restTemplate.exchange(request, Order.class);
 
         if(response.getBody().getSymbol() != null) {
+            Order executedOrder = response.getBody();
+            executedOrder.setPrice(getRealPrice(executedOrder));
             return response.getBody();
         }
 

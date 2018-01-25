@@ -42,7 +42,6 @@ public class MarkedUpdatedSubscriber {
     private final Counters counters;
     private final OrderAdapter orderAdapter;
     private final Exchange exchange;
-    private final AtomicLong counter = new AtomicLong(0);
     private final ConfigService configService;
 
     @Autowired
@@ -119,9 +118,9 @@ public class MarkedUpdatedSubscriber {
         event.getOrders()
             .forEach(order -> {
                 try {
+                    logger.debug(order);
                     Order orderResult = orderAdapter.placeOrder(order);
-                    logger.debug(orderResult);
-                    eventBus.post(new OrderUpdatedEvent(order));
+                    eventBus.post(new OrderUpdatedEvent(orderResult));
                 } catch (Exception e) {
                     logger.error("Error placing order: " + order);
                     logger.error(e);

@@ -26,7 +26,8 @@ public class OrderTest {
         assertEquals(1, order.getFills().size());
 
         double price = PriceUtil.getRealPrice(order);
-        assertEquals(0.00059010, price, 0.00000001);
+        assertEquals(0.017682, price, 0.0000001);
+        assertEquals(0.057, order.getFills().get(0).getQuantity(), 0.001);
     }
 
     @Test

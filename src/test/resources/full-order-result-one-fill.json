@@ -1,22 +1,22 @@
 {
-  "symbol": "KMDBTC",
-  "orderId": 4403390,
-  "clientOrderId": "6aGOxOf3DMLSyKLXVZpdvU",
-  "transactTime": 1516753877311,
+  "symbol": "DGDBTC",
+  "orderId": 3550607,
+  "clientOrderId": "Kerr4hONRKn1nytqo8wZiZ",
+  "transactTime": 1516911577294,
   "price": "0.00000000",
-  "origQty": "1.65000000",
-  "executedQty": "1.65000000",
+  "origQty": "0.05700000",
+  "executedQty": "0.05700000",
   "status": "FILLED",
   "timeInForce": "GTC",
   "type": "MARKET",
-  "side": "SELL",
+  "side": "BUY",
   "fills": [
     {
-      "price": "0.00059010",
-      "qty": "1.65000000",
-      "commission": "0.00039933",
+      "price": "0.01768200",
+      "qty": "0.05700000",
+      "commission": "0.00042433",
       "commissionAsset": "BNB",
-      "tradeId": 661462
+      "tradeId": 428825
     }
   ]
 }

@@ -29,7 +29,7 @@ public class Position {
 
         this(
                 currency,
-                getRealPrice(order),
+                order.getPrice(),
                 order.getQuantity(),
                 LocalDateTime.now(),
                 currency.getAnalysis().getMovingAverageDiff()
@@ -107,12 +107,13 @@ public class Position {
 
     @Override
     public String toString() {
-        return String.format("%.8f %s opened at %s at price %.8f current change %.2f%%, MADiffSlope %.8f",
+        return String.format("%.8f %s opened at price %.8f current change %.2f%%, thresholdMA %.8f, currentMA %.8f, open date %s",
             amount,
             currency.getSymbol(),
-            openTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
             openPrice,
             change,
-            thresholdMADiff);
+            thresholdMADiff,
+            currency.getAnalysis().getMovingAverageDiff(),
+            openTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
     }
 }
