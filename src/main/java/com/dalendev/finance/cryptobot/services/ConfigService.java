@@ -63,4 +63,8 @@ public class ConfigService {
     public Integer getMaxOrderPositions() {
         return Integer.parseInt(getProperty("maxOrderPositions"));
     }
+
+    public Double getExponentialFactor() {
+        return getAsDouble("exponentialFactor");
+    }
 }

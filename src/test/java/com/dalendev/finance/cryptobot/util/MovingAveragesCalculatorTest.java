@@ -1,19 +1,34 @@
 package com.dalendev.finance.cryptobot.util;
 
+import com.dalendev.finance.cryptobot.services.ConfigService;
 import com.dalendev.finance.cryptobot.test.TestUtil;
 import com.google.common.collect.EvictingQueue;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static junit.framework.TestCase.assertEquals;
+import static org.mockito.Mockito.when;
 
 
 /**
  * @author daniele.orler
  */
+@RunWith(MockitoJUnitRunner.class)
 public class MovingAveragesCalculatorTest {
 
+    @Mock
+    private ConfigService configServiceMock;
+    @InjectMocks
+    private MovingAveragesCalculator ma;
 
-    private MovingAveragesCalculator ma = new MovingAveragesCalculator();
+    @Before
+    public void setUp() throws Exception {
+        when(configServiceMock.getExponentialFactor()).thenReturn(10.0);
+    }
 
     @Test
     public void exponentialOnlyOneDataPoint() throws Exception {

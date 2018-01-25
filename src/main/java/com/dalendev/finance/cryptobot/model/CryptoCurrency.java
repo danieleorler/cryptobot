@@ -1,5 +1,7 @@
 package com.dalendev.finance.cryptobot.model;
 
+import com.dalendev.finance.cryptobot.util.MovingAveragesCalculator;
+
 /**
  * @author daniele.orler
  */
@@ -10,9 +12,9 @@ public class CryptoCurrency {
 
     private final Analysis analysis;
 
-    public CryptoCurrency(String symbol) {
+    public CryptoCurrency(String symbol, MovingAveragesCalculator movingAveragesCalculator) {
         this.symbol = symbol;
-        analysis = new Analysis();
+        analysis = new Analysis(movingAveragesCalculator);
     }
 
     public String getSymbol() {
