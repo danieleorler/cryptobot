@@ -21,7 +21,7 @@ public class PriceUtilTest {
 
     @Test
     public void getRealPriceTwoFills() throws Exception {
-        Order order = new Order("TESTBTC", Order.Side.BUY, Order.Type.MARKET, 90.0, 40.0);
+        Order order = new Order("TESTBTC", Order.Side.BUY, Order.Type.MARKET, 90.0);
         order.getFills()
             .add(new Fill(4.0, 80.0));
         order.getFills()
@@ -35,7 +35,7 @@ public class PriceUtilTest {
 
     @Test
     public void getRealPriceOneFill() throws Exception {
-        Order order = new Order("TESTBTC", Order.Side.BUY, Order.Type.MARKET, 90.0, 40.0);
+        Order order = new Order("TESTBTC", Order.Side.BUY, Order.Type.MARKET, 90.0);
         order.getFills()
                 .add(new Fill(4.0, 80.0));
 

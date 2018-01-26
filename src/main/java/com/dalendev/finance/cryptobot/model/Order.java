@@ -17,8 +17,7 @@ public class Order {
     private final Side side;
     private final Type type;
     private final Double quantity;
-    @JsonProperty("executedPrice")
-    private final Double price;
+    private Double price;
     @JsonProperty("orderId")
     private Long id;
     private Status status;
@@ -62,13 +61,12 @@ public class Order {
             @JsonProperty("symbol") String symbol,
             @JsonProperty("side") Side side,
             @JsonProperty("type") Type type,
-            @JsonProperty("executedQty") Double quantity,
-            @JsonProperty("executedPrice") Double price) {
+            @JsonProperty("executedQty") Double quantity) {
         this.symbol = symbol;
         this.side = side;
         this.type = type;
         this.quantity = quantity;
-        this.price = price;
+        this.price = 0.0;
         this.fills = new ArrayList<>();
     }
 
@@ -90,6 +88,10 @@ public class Order {
 
     public Double getPrice() {
         return price;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
     }
 
     public Long getId() {
@@ -177,7 +179,8 @@ public class Order {
         }
 
         public Order build() {
-            Order order = new Order(symbol, side, type, quantity, price);
+            Order order = new Order(symbol, side, type, quantity);
+            order.setPrice(price);
             order.setId(id);
             order.setStatus(status);
             return order;
