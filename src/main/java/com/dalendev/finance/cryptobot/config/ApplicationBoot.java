@@ -71,7 +71,7 @@ public class ApplicationBoot implements ApplicationListener<ApplicationReadyEven
                 .orElseThrow(() -> new LowBalanceException("BNB balance 0, buy some before starting the bot"))
                 .getFree();
 
-        logger.warn(String.format("You current BNB balance is: %.8f, make sure is enough for trading",
+        logger.warn(String.format("You current BNB balance is: %.8f, make sure is enough for paying the trading fees",
             bnbBalance));
     }
 
