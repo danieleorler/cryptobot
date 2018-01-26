@@ -137,18 +137,17 @@ public class MarkedUpdatedSubscriber {
                 logger.debug(order);
                 break;
             case FILLED:
+                logger.debug(order);
                 switch (order.getSide()) {
                     case BUY:
                         portfolio.getOrders().remove(order.getSymbol());
                         CryptoCurrency currency = market.getMarket().get(order.getSymbol());
                         portfolio.getPositions().put(order.getSymbol(), new Position(currency, order));
-                        logger.debug(order);
                         break;
                     case SELL:
                         portfolio.getOrders().remove(order.getSymbol());
                         Position position = portfolio.getPositions().remove(order.getSymbol());
-                        logger.debug(position);
-                        counters.addToProfit(PriceUtil.addPercentage(position.getOpenPrice(), position.getChange()) - position.getOpenPrice());
+                        counters.addToProfit(order.getPrice() - position.getOpenPrice());
                         logger.debug(String.format("Realized profit so far: %.8f BTC", counters.getProfit()));
                         break;
                 }
