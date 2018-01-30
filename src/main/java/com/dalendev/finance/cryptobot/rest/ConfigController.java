@@ -29,8 +29,13 @@ public class ConfigController {
         return configService.getProperty(key);
     }
 
-    @RequestMapping(value = "/{key}", method = RequestMethod.POST)
-    public void updateProperty(@PathVariable String key, @RequestBody String value) {
-        configService.updateProperty(key, value);
+    /**
+     * Ex: curl -X PUT http://localhost:8080/v1/api/config/takeProfit -d value=10
+     * @param key name of the property to update
+     * @param value the new value
+     */
+    @RequestMapping(value = "/{key}", method = RequestMethod.PUT)
+    public void updateProperty(@PathVariable String key, @RequestParam String value) {
+       configService.updateProperty(key, value);
     }
 }
