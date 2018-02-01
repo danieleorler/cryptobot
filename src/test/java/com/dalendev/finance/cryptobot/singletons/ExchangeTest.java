@@ -18,7 +18,7 @@ public class ExchangeTest {
     @Before
     public void setUp() throws Exception {
         exchange = new Exchange();
-        ExchangeInfo info = TestUtil.jsonFileToObject("exchange-info.json", ExchangeInfo.class);
+        ExchangeInfo info = TestUtil.jsonFileToObject("e2e/exchange-info.json", ExchangeInfo.class);
         exchange.setExchangeInfo(info);
     }
 

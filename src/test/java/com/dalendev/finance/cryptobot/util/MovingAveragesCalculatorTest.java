@@ -68,11 +68,4 @@ public class MovingAveragesCalculatorTest {
         assertEquals(13.0, ma.evaluateExponential(5, data.toArray()));
     }
 
-    @Test
-    public void exponentialWithRealData() throws Exception {
-
-        Double[] prices = TestUtil.jsonFileToObject("ETC.json", Double[].class);
-        assertEquals(0.003, ma.evaluateExponential(60, prices), 0.001);
-    }
-
 }

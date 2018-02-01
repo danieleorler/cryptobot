@@ -35,11 +35,11 @@ public class BinanceMock {
     private static Map<Long, Order> orders = new HashMap<>();
 
     public static void main(String[] args) {
-        Double[] prices = TestUtil.jsonFileToObject("ETC.json", Double[].class);
+        Double[] prices = TestUtil.jsonFileToObject("e2e/dgdbtc/dgdbtc-prices.json", Double[].class);
 
         responses = new ArrayBlockingQueue<>(prices.length);
         Arrays.stream(prices)
-                .map(price -> new PriceTicker("ETCBTC", price))
+                .map(price -> new PriceTicker("DGDBTC", price))
                 .forEach(pt -> responses.add(pt));
 
         mockServer = startClientAndServer(8123);
@@ -50,7 +50,7 @@ public class BinanceMock {
                 .callback(new PriceTickerCallback());
         mockServer.when(request()
                 .withMethod("POST")
-                .withPath("/api/v3/order/test"))
+                .withPath("/api/v3/order"))
                 .callback(new PlaceOrderCallback());
         mockServer.when(request()
                 .withMethod("GET")
@@ -64,6 +64,10 @@ public class BinanceMock {
                 .withMethod("GET")
                 .withPath("/api/v1/klines"))
                 .callback(new PriceHistoryCallback());
+        mockServer.when(request()
+                .withMethod("GET")
+                .withPath("/api/v3/account"))
+                .callback(new AccountCallback());
     }
 
     public static class PriceTickerCallback implements ExpectationCallback {
@@ -96,12 +100,11 @@ public class BinanceMock {
                 Order order = new Order.Builder()
                     .symbol(parameters.get("symbol"))
                     .side(Order.Side.valueOf(parameters.get("side")))
+                    .status(Order.Status.FILLED)
                     .type(Order.Type.valueOf(parameters.get("type")))
                     .quantity(Double.parseDouble(parameters.get("quantity")))
-                    .price(responses.element().getPrice())
                     .build();
                 order.setId(orderId.incrementAndGet());
-
                 Fill fill = new Fill(responses.element().getPrice(), Double.parseDouble(parameters.get("quantity")));
                 order.getFills().add(fill);
 
@@ -127,7 +130,7 @@ public class BinanceMock {
             try {
                 ExchangeInfo info = new ExchangeInfo();
                 Symbol symbol = new Symbol();
-                symbol.setSymbol("ETCBTC");
+                symbol.setSymbol("DGDBTC");
                 Filters.LotFilter filter = new Filters.LotFilter();
                 filter.setMaxQuantity(0.01);
                 filter.setFilterType(Filters.FilterType.LOT_SIZE);
@@ -175,12 +178,30 @@ public class BinanceMock {
         public HttpResponse handle(HttpRequest httpRequest) {
             try {
 
-                String file = String.format("etcbtc/etcbtc-import-price-history-%d.json", priceHistoryCounter.incrementAndGet());
+                String file = String.format("e2e/dgdbtc/dgdbtc-import-price-history-%d.json", priceHistoryCounter.incrementAndGet());
 
                 return response()
                         .withStatusCode(200)
                         .withHeader("Content-Type", "application/json")
                         .withBody(TestUtil.jsonFileToString(file));
+            } catch (Exception e) {
+                return response()
+                        .withStatusCode(500)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{\"code\": -1, \"msg\": \"" + e.getMessage() + "\"}");
+            }
+        }
+    }
+
+    private static class AccountCallback implements ExpectationCallback {
+
+        @Override
+        public HttpResponse handle(HttpRequest httpRequest) {
+            try {
+                return response()
+                        .withStatusCode(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(TestUtil.jsonFileToString("e2e/account-information.json"));
             } catch (Exception e) {
                 return response()
                         .withStatusCode(500)

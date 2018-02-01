@@ -33,7 +33,7 @@ public class PriceTickerJob {
         this.eventBus = eventBus;
     }
 
-    @Scheduled(initialDelay = 60000, fixedDelay = 60000)
+    @Scheduled(initialDelayString = "${config.sampleInitialDelayMillis:60000}", fixedDelayString = "${config.sampleIntervalMillis:60000}")
     public void samplePrice() {
         if(cryptoCurrencyService.isMarketReady()) {
             sampleMarket();

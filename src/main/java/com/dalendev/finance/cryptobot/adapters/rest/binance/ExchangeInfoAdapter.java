@@ -69,7 +69,7 @@ public class ExchangeInfoAdapter extends BaseAdapter {
         return prices;
     }
 
-    public List<Double> getPricesForPeriod(String symbol, Long from, Long to) {
+    private List<Double> getPricesForPeriod(String symbol, Long from, Long to) {
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("symbol", symbol);
