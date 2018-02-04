@@ -20,13 +20,13 @@ public interface Indicator {
      * @param currency
      * @return
      */
-    Boolean shouldBuy(CryptoCurrency currency);
+    Boolean shouldOpen(CryptoCurrency currency);
 
     /**
      * Decides if the given position should be closed
      * @param position
      * @return
      */
-    Boolean shouldSell(Position position);
+    Boolean shouldClose(Position position);
 
 }

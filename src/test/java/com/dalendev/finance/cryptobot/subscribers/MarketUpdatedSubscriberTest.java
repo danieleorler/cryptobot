@@ -79,7 +79,7 @@ public class MarketUpdatedSubscriberTest {
         orderFilled.setPrice(0.01768200);
         when(orderAdapter.placeOrder(any(Order.class))).thenReturn(orderFilled);
 
-        ExponentialMovingAverageIndicator indicator = new ExponentialMovingAverageIndicator(new MovingAveragesCalculator(configService));
+        ExponentialMovingAverageIndicator indicator = new ExponentialMovingAverageIndicator(new MovingAveragesCalculator(configService), configService);
         CryptoCurrency currency = new CryptoCurrency("DGDBTC");
         indicator.addSample(0.01767400, currency);
         market.getMarket().put("DGDBTC", currency);

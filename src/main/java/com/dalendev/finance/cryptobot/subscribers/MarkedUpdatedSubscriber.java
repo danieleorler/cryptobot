@@ -9,6 +9,7 @@ import com.dalendev.finance.cryptobot.model.events.OrderUpdatedEvent;
 import com.dalendev.finance.cryptobot.model.events.OrdersSelectedEvent;
 import com.dalendev.finance.cryptobot.model.events.PositionsUpdatedEvent;
 import com.dalendev.finance.cryptobot.services.ConfigService;
+import com.dalendev.finance.cryptobot.services.Indicator;
 import com.dalendev.finance.cryptobot.singletons.Counters;
 import com.dalendev.finance.cryptobot.singletons.Exchange;
 import com.dalendev.finance.cryptobot.singletons.Market;
@@ -24,7 +25,6 @@ import org.springframework.stereotype.Component;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 /**
@@ -43,9 +43,10 @@ public class MarkedUpdatedSubscriber {
     private final OrderAdapter orderAdapter;
     private final Exchange exchange;
     private final ConfigService configService;
+    private final Indicator indicator;
 
     @Autowired
-    public MarkedUpdatedSubscriber(Market market, EventBus eventBus, Portfolio portfolio, Counters counters, OrderAdapter orderAdapter, Exchange exchange, ConfigService configService) {
+    public MarkedUpdatedSubscriber(Market market, EventBus eventBus, Portfolio portfolio, Counters counters, OrderAdapter orderAdapter, Exchange exchange, ConfigService configService, Indicator indicator) {
         this.market = market;
         this.portfolio = portfolio;
         this.eventBus = eventBus;
@@ -53,6 +54,7 @@ public class MarkedUpdatedSubscriber {
         this.orderAdapter = orderAdapter;
         this.exchange = exchange;
         this.configService = configService;
+        this.indicator = indicator;
         eventBus.register(this);
     }
 
@@ -66,7 +68,7 @@ public class MarkedUpdatedSubscriber {
             .map(Map.Entry::getValue)
             .filter(crypto -> !portfolio.getPositions().containsKey(crypto.getSymbol()))
             .filter(crypto -> !portfolio.getOrders().containsKey(crypto.getSymbol()))
-            .filter(crypto -> shouldOpen(crypto))
+            .filter(crypto -> indicator.shouldOpen(crypto))
             .sorted((c1, c2) -> Double.compare(c2.getAnalysis().getPrice30mSlope(), c1.getAnalysis().getPrice30mSlope()))
             .findFirst()
             .orElse(null);
@@ -95,7 +97,7 @@ public class MarkedUpdatedSubscriber {
     public void selectSellOrders(PositionsUpdatedEvent event) {
         List<Order> orders = portfolio.getPositions().entrySet().stream()
             .map(Map.Entry::getValue)
-            .filter(position -> shouldClose(position))
+            .filter(position -> indicator.shouldClose(position))
             .map(p -> new Order.Builder()
                 .symbol(p.getSymbol())
                 .side(Order.Side.SELL)
@@ -173,21 +175,6 @@ public class MarkedUpdatedSubscriber {
             });
 
         eventBus.post(new PositionsUpdatedEvent());
-    }
-
-    private boolean shouldOpen(CryptoCurrency currency) {
-        Double percentage = currency.getAnalysis().getMovingAverageDiff();
-
-        if(percentage > 1 && currency.getAnalysis().getPrice30mSlope() > 0) {
-            return true;
-        }
-        return false;
-    }
-
-    private boolean shouldClose(Position position) {
-
-        return position.getChange() > configService.getTakeProfit() ||
-                position.getThresholdMADiff() > position.getCurrency().getAnalysis().getMovingAverageDiff();
     }
 
 }
