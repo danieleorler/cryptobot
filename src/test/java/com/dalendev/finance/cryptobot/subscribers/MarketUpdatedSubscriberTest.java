@@ -6,6 +6,7 @@ import com.dalendev.finance.cryptobot.model.Order;
 import com.dalendev.finance.cryptobot.model.events.OrderUpdatedEvent;
 import com.dalendev.finance.cryptobot.model.events.OrdersSelectedEvent;
 import com.dalendev.finance.cryptobot.services.ConfigService;
+import com.dalendev.finance.cryptobot.services.ExponentialMovingAverageIndicator;
 import com.dalendev.finance.cryptobot.singletons.Counters;
 import com.dalendev.finance.cryptobot.singletons.Exchange;
 import com.dalendev.finance.cryptobot.singletons.Market;
@@ -78,9 +79,9 @@ public class MarketUpdatedSubscriberTest {
         orderFilled.setPrice(0.01768200);
         when(orderAdapter.placeOrder(any(Order.class))).thenReturn(orderFilled);
 
-        MovingAveragesCalculator movingAveragesCalculator = new MovingAveragesCalculator(configService);
-        CryptoCurrency currency = new CryptoCurrency("DGDBTC", movingAveragesCalculator);
-        currency.getAnalysis().addPrice(0.01767400);
+        ExponentialMovingAverageIndicator indicator = new ExponentialMovingAverageIndicator(new MovingAveragesCalculator(configService), configService);
+        CryptoCurrency currency = new CryptoCurrency("DGDBTC");
+        indicator.addSample(0.01767400, currency);
         market.getMarket().put("DGDBTC", currency);
 
         Order orderToBePlaced = new Order.Builder()

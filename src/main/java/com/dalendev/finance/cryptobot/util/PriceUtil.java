@@ -18,8 +18,8 @@ public class PriceUtil {
         return price + (price * percentage/100);
     }
 
-    public static Double getPercentage(Double price, Double amount) {
-        return (amount / price) * 100;
+    public static Double getPercentage(Double a, Double b) {
+        return ((a / b) * 100) - 100;
     }
 
     public static Double adjust(Double amount, Double lot) {

@@ -1,7 +1,5 @@
 package com.dalendev.finance.cryptobot.model;
 
-import com.dalendev.finance.cryptobot.util.MovingAveragesCalculator;
-import com.dalendev.finance.cryptobot.util.PriceUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.EvictingQueue;
 
@@ -17,38 +15,15 @@ public class Analysis {
     private final EvictingQueue<Double> EMA6h;
     private final EvictingQueue<Double> price30m;
 
-    @JsonIgnore
-    private final MovingAveragesCalculator movingAveragesCalculator;
-
     private Double price30mSlope = 0.0;
     private Double movingAverageDiff = 0.0;
 
-    public Analysis(MovingAveragesCalculator movingAveragesCalculator) {
+    public Analysis() {
         EMA6h = EvictingQueue.create(24 * 60);
         EMA24h = EvictingQueue.create(24 * 60);
         prices6 = EvictingQueue.create(6 * 60);
         prices24 = EvictingQueue.create(24 * 60);
         price30m = EvictingQueue.create(30);
-        this.movingAveragesCalculator = movingAveragesCalculator;
-    }
-
-    public void addPrice(double price) {
-        prices6.add(price);
-        prices24.add(price);
-
-        double currentEMA6h = movingAveragesCalculator.evaluateExponential(60, prices6.toArray());
-        double currentEMA24h = movingAveragesCalculator.evaluateExponential(60, prices24.toArray());
-
-        EMA6h.add(currentEMA6h);
-        EMA24h.add(currentEMA24h);
-
-        if(EMA24h.remainingCapacity() < 1) {
-            Double diff = currentEMA6h - currentEMA24h;
-            this.movingAverageDiff = PriceUtil.getPercentage(currentEMA6h, diff);
-            this.price30m.add(price);
-            this.price30mSlope = PriceUtil.slope(this.price30m);
-        }
-
     }
 
     public EvictingQueue<Double> getEMA24h() {
@@ -73,5 +48,17 @@ public class Analysis {
 
     public EvictingQueue<Double> getPrices24() {
         return prices24;
+    }
+
+    public EvictingQueue<Double> getPrices6() {
+        return prices6;
+    }
+
+    public void setMovingAverageDiff(Double movingAverageDiff) {
+        this.movingAverageDiff = movingAverageDiff;
+    }
+
+    public void setPrice30mSlope(Double price30mSlope) {
+        this.price30mSlope = price30mSlope;
     }
 }

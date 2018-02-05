@@ -8,7 +8,7 @@ public class Counters {
     private Double profit;
 
     public Counters() {
-        profit = 0d;
+        profit = 0.0;
     }
 
     public Double addToProfit(Double delta) {
