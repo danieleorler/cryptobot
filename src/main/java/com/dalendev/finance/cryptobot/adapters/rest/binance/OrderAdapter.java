@@ -25,7 +25,7 @@ import static com.dalendev.finance.cryptobot.util.PriceUtil.getRealPrice;
 @Component
 public class OrderAdapter extends BaseAdapter {
 
-    @Value("${binance.order_path}")
+    @Value("${binance.order_path:/api/v3/order}")
     private String orderPath;
 
     @Autowired

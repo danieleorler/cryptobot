@@ -20,13 +20,13 @@ public class BaseAdapter {
     protected final RestTemplate restTemplate;
     protected final ObjectMapper objectMapper;
 
-    @Value("${binance.api_key}")
+    @Value("${binance.api_key:123}")
     protected String apiKey;
 
-    @Value("${binance.api_secret}")
+    @Value("${binance.api_secret:123}")
     private String apiSecret;
 
-    @Value("${binance.base_url}")
+    @Value("${binance.base_url:http://localhost:8080}")
     protected String baseUrl;
 
     @Autowired
