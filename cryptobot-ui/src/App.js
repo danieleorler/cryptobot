@@ -34,6 +34,7 @@ class App extends Component {
     }
 
     componentDidMount() {
+        this.updateChart();
         setInterval(this.updateChart, 30000);
     }
 
