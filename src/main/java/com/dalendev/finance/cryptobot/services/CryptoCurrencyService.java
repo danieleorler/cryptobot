@@ -5,7 +5,6 @@ import com.dalendev.finance.cryptobot.model.binance.PriceTicker;
 import com.dalendev.finance.cryptobot.singletons.Market;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -20,7 +19,6 @@ public class CryptoCurrencyService {
     private final Market market;
     private final Indicator indicatorService;
 
-    @Autowired
     public CryptoCurrencyService(Market market, Indicator indicatorService) {
         this.market = market;
         this.indicatorService = indicatorService;
@@ -34,6 +32,7 @@ public class CryptoCurrencyService {
             crypto.setLatestPrice(priceTicker.getPrice());
         } else {
             CryptoCurrency newCrypto = new CryptoCurrency(priceTicker.getSymbol());
+            indicatorService.init(newCrypto);
             indicatorService.addSample(priceTicker.getPrice(), newCrypto);
             newCrypto.setLatestPrice(priceTicker.getPrice());
             market.getMarket().put(newCrypto.getSymbol(), newCrypto);

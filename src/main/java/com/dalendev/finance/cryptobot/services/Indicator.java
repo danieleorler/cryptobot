@@ -9,6 +9,12 @@ import com.dalendev.finance.cryptobot.model.Position;
 public interface Indicator {
 
     /**
+     * Initializes the given CryptoCurrency's analysis
+     * @param currency CryptoCurrency to initialize
+     */
+    void init(CryptoCurrency currency);
+
+    /**
      * Adds a new sample to the CryptoCurrency's analysis
      * @param price the new sample
      * @param currency CryptoCurrency to update

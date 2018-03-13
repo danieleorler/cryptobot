@@ -1,40 +1,22 @@
 package com.dalendev.finance.cryptobot.util;
 
-import com.dalendev.finance.cryptobot.services.ConfigService;
-import com.dalendev.finance.cryptobot.test.TestUtil;
 import com.google.common.collect.EvictingQueue;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
+import static com.dalendev.finance.cryptobot.util.MovingAveragesCalculator.exponential;
 import static junit.framework.TestCase.assertEquals;
-import static org.mockito.Mockito.when;
 
 
 /**
  * @author daniele.orler
  */
-@RunWith(MockitoJUnitRunner.class)
 public class MovingAveragesCalculatorTest {
-
-    @Mock
-    private ConfigService configServiceMock;
-    @InjectMocks
-    private MovingAveragesCalculator ma;
-
-    @Before
-    public void setUp() throws Exception {
-        when(configServiceMock.getExponentialFactor()).thenReturn(10.0);
-    }
 
     @Test
     public void exponentialOnlyOneDataPoint() throws Exception {
         EvictingQueue<Double> data = EvictingQueue.create(10);
         data.add(1.0);
-        assertEquals(1.0, ma.evaluateExponential(5, data.toArray()));
+        assertEquals(1.0, exponential(5, data.toArray()));
     }
 
     @Test
@@ -42,7 +24,7 @@ public class MovingAveragesCalculatorTest {
         EvictingQueue<Double> data = EvictingQueue.create(10);
         data.add(1.0);
         data.add(2.0);
-        assertEquals(1.5, ma.evaluateExponential(5, data.toArray()));
+        assertEquals(2.0, exponential(5, data.toArray()));
     }
 
     @Test
@@ -53,7 +35,7 @@ public class MovingAveragesCalculatorTest {
         data.add(3.0);
         data.add(4.0);
         data.add(5.0);
-        assertEquals(3.0, ma.evaluateExponential(5, data.toArray()));
+        assertEquals(5.0, exponential(5, data.toArray()));
     }
 
     @Test
@@ -65,7 +47,7 @@ public class MovingAveragesCalculatorTest {
         data.add(4.0);
         data.add(5.0);
         data.add(6.0);
-        assertEquals(13.0, ma.evaluateExponential(5, data.toArray()));
+        assertEquals(5.666, exponential(5, data.toArray()), 0.001);
     }
 
 }

@@ -12,7 +12,6 @@ import com.dalendev.finance.cryptobot.singletons.Exchange;
 import com.dalendev.finance.cryptobot.singletons.Market;
 import com.dalendev.finance.cryptobot.singletons.Portfolio;
 import com.dalendev.finance.cryptobot.test.TestUtil;
-import com.dalendev.finance.cryptobot.util.MovingAveragesCalculator;
 import com.google.common.eventbus.EventBus;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,26 +59,19 @@ public class MarketUpdatedSubscriberTest {
 
     @Before
     public void setUp() throws Exception {
-
-
-
         eventBus.getOrders().clear();
         market.getMarket().clear();
-
     }
 
     @Test
     public void placeOrderTest() throws Exception {
-
-        // mock config service
-        when(configService.getExponentialFactor()).thenReturn(8.0);
 
         // mock order adapter
         Order orderFilled = TestUtil.jsonFileToObject("full-order-result-one-fill.json", Order.class);
         orderFilled.setPrice(0.01768200);
         when(orderAdapter.placeOrder(any(Order.class))).thenReturn(orderFilled);
 
-        ExponentialMovingAverageIndicator indicator = new ExponentialMovingAverageIndicator(new MovingAveragesCalculator(configService), configService);
+        ExponentialMovingAverageIndicator indicator = new ExponentialMovingAverageIndicator(configService);
         CryptoCurrency currency = new CryptoCurrency("DGDBTC");
         indicator.addSample(0.01767400, currency);
         market.getMarket().put("DGDBTC", currency);
@@ -134,7 +126,5 @@ public class MarketUpdatedSubscriberTest {
             return orders;
         }
     }
-
-
 
 }
