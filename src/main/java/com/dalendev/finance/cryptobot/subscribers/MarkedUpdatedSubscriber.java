@@ -68,8 +68,7 @@ public class MarkedUpdatedSubscriber {
             .map(Map.Entry::getValue)
             .filter(crypto -> !portfolio.getPositions().containsKey(crypto.getSymbol()))
             .filter(crypto -> !portfolio.getOrders().containsKey(crypto.getSymbol()))
-            .filter(crypto -> indicator.shouldOpen(crypto))
-            .sorted((c1, c2) -> Double.compare(c2.getAnalysis().getPrice30mSlope(), c1.getAnalysis().getPrice30mSlope()))
+            .filter(indicator::shouldOpen)
             .findFirst()
             .orElse(null);
 
@@ -97,7 +96,7 @@ public class MarkedUpdatedSubscriber {
     public void selectSellOrders(PositionsUpdatedEvent event) {
         List<Order> orders = portfolio.getPositions().entrySet().stream()
             .map(Map.Entry::getValue)
-            .filter(position -> indicator.shouldClose(position))
+            .filter(indicator::shouldClose)
             .map(p -> new Order.Builder()
                 .symbol(p.getSymbol())
                 .side(Order.Side.SELL)
@@ -149,8 +148,8 @@ public class MarkedUpdatedSubscriber {
                     case SELL:
                         portfolio.getOrders().remove(order.getSymbol());
                         Position position = portfolio.getPositions().remove(order.getSymbol());
-                        counters.addToProfit(order.getPrice() - position.getOpenPrice());
-                        logger.debug(String.format("Realized profit so far: %.8f BTC", counters.getProfit()));
+                        counters.addToProfit(position.getChange());
+                        logger.debug(String.format("Realized profit so far: %.8f%%", counters.getProfit()));
                         break;
                 }
         }

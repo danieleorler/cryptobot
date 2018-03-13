@@ -1,68 +1,31 @@
 package com.dalendev.finance.cryptobot.util;
 
-import com.dalendev.finance.cryptobot.services.ConfigService;
-import org.apache.commons.math3.stat.descriptive.UnivariateStatistic;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
  * @author daniele.orler
  */
-@Component
 public class MovingAveragesCalculator {
 
-    private final ConfigService configService;
+    public static double simple(int periodSpan, Object[] data) {
+        double[] closingPeriodsPrices = periodsClosingPrices(periodSpan, data);
 
-    @Autowired
-    public MovingAveragesCalculator(ConfigService configService) {
-        this.configService = configService;
+        return Arrays.stream(closingPeriodsPrices)
+                .average()
+                .getAsDouble();
     }
 
-    public double evaluate(double[] data) {
-        return evaluate(data, 0, data.length);
-    }
-
-    public double evaluate(double[] data, int begin, int periods) {
-        double wma = 0;
-        int multiplier = 1;
-        for(int i = begin; i < periods; i++) {
-            wma += multiplier++ * data[i];
-        }
-        return wma / ((multiplier * (multiplier-1)) / 2);
-    }
-
-    public double evaluateWeighted(Object[] data) {
-        double[] collect = Arrays.stream(data)
-                .mapToDouble(value -> (double) value)
-                .toArray();
-
-        return evaluate(collect);
-    }
-
-    public double evaluateSimple(Object[] data) {
-        double collect = Arrays.stream(data)
-                .mapToDouble(value -> (double) value)
-                .reduce(0, Double::sum);
-
-        return collect/data.length;
-
-    }
-
-    public double evaluateExponential(int periodSpan, Object[] data) {
-        double[] closingPeriodsPrices = closingPeriodsPrices(periodSpan, data);
-        double multiplier = configService.getExponentialFactor() / (closingPeriodsPrices.length + 1.0);
+    public static double exponential(int periodSpan, Object[] data) {
+        double[] closingPeriodsPrices = periodsClosingPrices(periodSpan, data);
+        double multiplier = 2 / (closingPeriodsPrices.length + 1.0);
         double currentEma = closingPeriodsPrices[0];
-        double ema = ema(multiplier, currentEma, Arrays.copyOfRange(closingPeriodsPrices, 1, closingPeriodsPrices.length));
-        return ema;
-
+        return ema(multiplier, currentEma, Arrays.copyOfRange(closingPeriodsPrices, 1, closingPeriodsPrices.length));
     }
 
-    private double ema(double alpha, double oldEma, double data[]) {
+    private static double ema(double alpha, double oldEma, double data[]) {
         if(data.length > 0) {
             double currentEma = alpha * data[0] + (1 - alpha) * oldEma;
             return ema(alpha, currentEma, Arrays.copyOfRange(data, 1, data.length));
@@ -71,40 +34,23 @@ public class MovingAveragesCalculator {
         }
     }
 
-    private double[] closingPeriodsPrices(int periodSpan, Object[] data) {
-
+    private static double[] periodsClosingPrices(int periodSpan, Object[] data) {
         if(data.length < periodSpan) {
-            double sum = Arrays.stream(data)
-                    .mapToDouble(val -> (double) val)
-                    .sum();
-            return new double[] {sum / data.length};
+            return new double[] { (double) data[data.length-1] };
         }
 
-        List<Double> closingPeriodsPrices = new ArrayList<>();
-
-        double sum = 0.0;
-        for(int i = 0; i < data.length; i++) {
-            sum += (double)data[i];
-            if((i+1) % periodSpan == 0) {
-                closingPeriodsPrices.add(sum / periodSpan);
-                sum = 0.0;
-            }
-
-        }
+        List<Double> closingPeriodsPrices = IntStream.range(0, data.length)
+                // take only those indexes that represents the end of a period
+                .filter(i -> (i + 1) % periodSpan == 0)
+                .mapToDouble(i -> (Double) data[i])
+                .boxed()
+                .collect(Collectors.toList());
 
         if(data.length % periodSpan != 0) {
-            closingPeriodsPrices.add(sum / (data.length % periodSpan));
+            closingPeriodsPrices.add((Double) data[data.length-1]);
         }
 
-        double[] toReturn = new double[closingPeriodsPrices.size()];
-
-        IntStream.range(0, closingPeriodsPrices.size())
-                .forEach(i -> toReturn[i] = closingPeriodsPrices.get(i));
-
-        return toReturn;
+        return closingPeriodsPrices.stream().mapToDouble(Double::doubleValue).toArray();
     }
 
-    public UnivariateStatistic copy() {
-        return null;
-    }
 }
