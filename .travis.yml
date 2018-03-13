@@ -1,0 +1,22 @@
+dist: trusty
+sudo: required
+
+language: java
+jdk:
+- oraclejdk8
+
+cache:
+  directories:
+  - $HOME/.m2
+
+jobs:
+  include:
+    - stage: compile
+      script:
+      - mvn clean package
+      - sudo apt-get -y install python3-pip
+      - python3 -V
+      - pip3 -V
+      - pip3 install requests
+      - nohup java -jar cryptobot/target/cryptobot-1.0-SNAPSHOT.jar --spring.profiles.active=simpleBoot &
+      - python3 health.py http://localhost:8080/health
