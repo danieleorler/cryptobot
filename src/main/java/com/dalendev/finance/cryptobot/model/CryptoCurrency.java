@@ -8,11 +8,10 @@ public class CryptoCurrency {
     private final String symbol;
     private Double latestPrice;
 
-    private final Analysis analysis;
+    private CryptoAnalysis analysis;
 
     public CryptoCurrency(String symbol) {
         this.symbol = symbol;
-        analysis = new Analysis();
     }
 
     public String getSymbol() {
@@ -27,7 +26,11 @@ public class CryptoCurrency {
         this.latestPrice = latestPrice;
     }
 
-    public Analysis getAnalysis() {
+    public void setAnalysis(CryptoAnalysis analysis) {
+        this.analysis = analysis;
+    }
+
+    public CryptoAnalysis getAnalysis() {
         return analysis;
     }
 }
