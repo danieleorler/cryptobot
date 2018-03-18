@@ -143,12 +143,14 @@ public class MarkedUpdatedSubscriber {
                     case BUY:
                         portfolio.getOrders().remove(order.getSymbol());
                         CryptoCurrency currency = market.getMarket().get(order.getSymbol());
-                        portfolio.getPositions().put(order.getSymbol(), new Position(currency, order));
+                        Position openingPosition = new Position(currency, order);
+                        indicator.init(openingPosition);
+                        portfolio.getPositions().put(order.getSymbol(), openingPosition);
                         break;
                     case SELL:
                         portfolio.getOrders().remove(order.getSymbol());
-                        Position position = portfolio.getPositions().remove(order.getSymbol());
-                        counters.addToProfit(position.getChange());
+                        Position closingPosition = portfolio.getPositions().remove(order.getSymbol());
+                        counters.addToProfit(closingPosition.getChange());
                         logger.debug(String.format("Realized profit so far: %.8f%%", counters.getProfit()));
                         break;
                 }
@@ -165,11 +167,8 @@ public class MarkedUpdatedSubscriber {
                 Double openPrice = position.getOpenPrice();
                 position.setChange(PriceUtil.change(openPrice, currentPrice));
 
-                Double thresholdMADiff = crypto.getAnalysis().getMovingAverageDiff()/2;
+                indicator.updatePosition(position);
 
-                if(thresholdMADiff > position.getThresholdMADiff()) {
-                    position.setThresholdMADiff(thresholdMADiff);
-                }
                 logger.debug(position);
             });
 

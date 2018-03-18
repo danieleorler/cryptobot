@@ -20,10 +20,8 @@ public class Position {
     private final LocalDateTime openTime;
     private LocalDateTime closeTime;
     private Double change;
-    private Double thresholdMADiff;
-    private Double openMADiff;
-    @JsonIgnore
-    private final EvictingQueue<Double> mADiffs30m;
+    private PositionAnalysis analysis;
+
 
     public Position(CryptoCurrency currency, Order order) {
 
@@ -31,22 +29,17 @@ public class Position {
                 currency,
                 order.getPrice(),
                 order.getQuantity(),
-                LocalDateTime.now(),
-                currency.getAnalysis().getMovingAverageDiff()
+                LocalDateTime.now()
         );
     }
 
-    public Position(CryptoCurrency currency, Double openPrice, Double amount, LocalDateTime openTime, Double openMADiff) {
+    public Position(CryptoCurrency currency, Double openPrice, Double amount, LocalDateTime openTime) {
         this.currency = currency;
         this.openPrice = openPrice;
         this.amount = amount;
         this.openTime = openTime;
         this.closePrice = null;
         this.change = 0d;
-        this.thresholdMADiff = 0.0;
-        this.openMADiff = openMADiff;
-        this.mADiffs30m = EvictingQueue.create(30);
-        this.mADiffs30m.add(openMADiff);
     }
 
     public Double getChange() {
@@ -81,10 +74,6 @@ public class Position {
         return currency;
     }
 
-    public Double getThresholdMADiff() {
-        return thresholdMADiff;
-    }
-
     public LocalDateTime getCloseTime() {
         return closeTime;
     }
@@ -93,27 +82,22 @@ public class Position {
         this.closeTime = closeTime;
     }
 
-    public EvictingQueue<Double> getMADiffs30m() {
-        return mADiffs30m;
+    public PositionAnalysis getAnalysis() {
+        return analysis;
     }
 
-    public void setThresholdMADiff(Double mADiffSlope) {
-        this.thresholdMADiff = mADiffSlope;
-    }
-
-    public Double getOpenMADiff() {
-        return openMADiff;
+    public void setAnalysis(PositionAnalysis analysis) {
+        this.analysis = analysis;
     }
 
     @Override
     public String toString() {
-        return String.format("%.8f %s opened at price %.8f current change %.2f%%, thresholdMA %.8f, currentMA %.8f, open date %s",
+        return String.format("%.8f %s opened at price %.8f [%.2f%%] open time %s, %s",
             amount,
             currency.getSymbol(),
             openPrice,
             change,
-            thresholdMADiff,
-            currency.getAnalysis().getMovingAverageDiff(),
-            openTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+            openTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+            analysis.toString());
     }
 }
