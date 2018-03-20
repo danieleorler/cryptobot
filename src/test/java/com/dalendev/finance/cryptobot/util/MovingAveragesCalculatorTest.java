@@ -50,4 +50,12 @@ public class MovingAveragesCalculatorTest {
         assertEquals(5.666, exponential(5, data.toArray()), 0.001);
     }
 
+    @Test
+    public void exponentialTwoPeriodsOfSpan1() throws Exception {
+        EvictingQueue<Double> data = EvictingQueue.create(10);
+        data.add(5.0);
+        data.add(6.0);
+        assertEquals(5.666, exponential(1, data.toArray()), 0.001);
+    }
+
 }

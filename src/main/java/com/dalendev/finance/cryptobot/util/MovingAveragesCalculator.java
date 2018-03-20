@@ -39,6 +39,12 @@ public class MovingAveragesCalculator {
             return new double[] { (double) data[data.length-1] };
         }
 
+        if(periodSpan == 1) {
+            return Arrays.stream(data)
+                    .mapToDouble(element -> (double) element)
+                    .toArray();
+        }
+
         List<Double> closingPeriodsPrices = IntStream.range(0, data.length)
                 // take only those indexes that represents the end of a period
                 .filter(i -> (i + 1) % periodSpan == 0)
