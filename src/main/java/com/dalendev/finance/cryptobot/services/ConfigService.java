@@ -3,68 +3,50 @@ package com.dalendev.finance.cryptobot.services;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import java.util.HashMap;
-import java.util.Map;
+import static java.lang.Double.parseDouble;
+import static java.lang.Integer.parseInt;
 
 /**
  * Created by rein on 2018-01-24.
  */
 @Service
-@ConfigurationProperties()
 public class ConfigService {
     private Log logger = LogFactory.getLog(ConfigService.class);
 
-    private final Map<String, String> updatableConfig = new HashMap<>();
-
-    @PostConstruct
-    public void post() {
-        logger.info("Started with default properties. " +  this);
-    }
-
-    public Map<String, String> getUpdatableConfig() {
-        return updatableConfig;
-    }
-
-    @Override
-    public String toString() {
-        return "ConfigService{" +
-                "config=" + updatableConfig +
-                '}';
-    }
+    @Value("${updatableConfig.takeProfit}")
+    private int takeProfit;
+    @Value("${updatableConfig.maxOrderPrice}")
+    private double maxOrderPrice;
+    @Value("${updatableConfig.maxPositionsOpened}")
+    private int maxPositionsOpened;
 
     public void updateProperty(String key, String value)   {
-        if(!updatableConfig.containsKey(key)){
-            throw new IllegalArgumentException(key + " is not a supported property");
+        if(key.equalsIgnoreCase("takeProfit")) {
+            takeProfit = parseInt(value);
+            return;
         }
-        logger.info(String.format("Updating property %s to %s", key, value));
-        updatableConfig.put(key, value);
+        if(key.equalsIgnoreCase("maxOrderPrice")) {
+            maxOrderPrice = parseDouble(value);
+            return;
+        }
+        if(key.equalsIgnoreCase("maxPositionsOpened")) {
+            takeProfit = parseInt(value);
+            return;
+        }
     }
 
-    public String getProperty(String key){
-        return updatableConfig.get(key);
+    public int getTakeProfit() {
+        return takeProfit;
     }
 
-    private Double getAsDouble(String key){
-        return Double.parseDouble(updatableConfig.get(key));
+    public double getMaxOrderPrice() {
+        return maxOrderPrice;
     }
 
-    public Double getTakeProfit() {
-        return getAsDouble("takeProfit");
-    }
-
-    public Double getMaxOrderPrice() {
-        return getAsDouble("maxOrderPrice");
-    }
-
-    public Integer getMaxOrderPositions() {
-        return Integer.parseInt(getProperty("maxOrderPositions"));
-    }
-
-    public Double getExponentialFactor() {
-        return getAsDouble("exponentialFactor");
+    public int getMaxPositionsOpened() {
+        return maxPositionsOpened;
     }
 }

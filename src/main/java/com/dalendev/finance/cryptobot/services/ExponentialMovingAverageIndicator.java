@@ -7,6 +7,9 @@ import com.dalendev.finance.cryptobot.model.PositionAnalysis;
 import com.dalendev.finance.cryptobot.util.PriceUtil;
 import com.google.common.collect.EvictingQueue;
 import com.google.common.collect.ImmutableMap;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -18,12 +21,41 @@ import static com.dalendev.finance.cryptobot.util.MovingAveragesCalculator.expon
  * @author daniele.orler
  */
 @Component
+@Profile("ema")
 public class ExponentialMovingAverageIndicator implements Indicator<ExponentialMovingAverageIndicator.EmaCryptoAnalysis, ExponentialMovingAverageIndicator.EmaPositionAnalysis> {
 
     private final ConfigService configService;
+    
+    private final int periodSpan;
+    private final int shortEmaPeriods;
+    private final int longEmaPeriods;
+    private final int thresholdEmaDiffFactor;
+    private final int thresholdEmaDiffCutOff;
+    
 
     public ExponentialMovingAverageIndicator(ConfigService configService) {
         this.configService = configService;
+        this.periodSpan = 10;
+        this.shortEmaPeriods = 7;
+        this.longEmaPeriods = 25;
+        this.thresholdEmaDiffFactor = 2;
+        this.thresholdEmaDiffCutOff = 1;
+    }
+
+    @Autowired
+    public ExponentialMovingAverageIndicator(
+            ConfigService configService,
+            @Value("${ema.periodSpan}") int periodSpan,
+            @Value("${ema.shortEmaPeriods}") int shortEmaPeriods,
+            @Value("${ema.longEmaPeriods}") int longEmaPeriods,
+            @Value("${ema.thresholdEmaDiffFactor}") int thresholdEmaDiffFactor,
+            @Value("${ema.thresholdEmaDiffCutOff}") int thresholdEmaDiffCutOff) {
+        this.configService = configService;
+        this.periodSpan = periodSpan;
+        this.shortEmaPeriods = shortEmaPeriods;
+        this.longEmaPeriods = longEmaPeriods;
+        this.thresholdEmaDiffFactor = thresholdEmaDiffFactor;
+        this.thresholdEmaDiffCutOff = thresholdEmaDiffCutOff;
     }
 
     @Override
@@ -35,7 +67,7 @@ public class ExponentialMovingAverageIndicator implements Indicator<ExponentialM
     public void init(Position position) {
         EmaPositionAnalysis positionAnalysis = new EmaPositionAnalysis();
         EmaCryptoAnalysis cryptoAnalysis = cast(position.getCurrency().getAnalysis());
-        positionAnalysis.setThresholdMADiff(cryptoAnalysis.getMovingAverageDiff() / 2);
+        positionAnalysis.setThresholdMADiff(cryptoAnalysis.getMovingAverageDiff() / thresholdEmaDiffFactor);
         position.setAnalysis(positionAnalysis);
     }
 
@@ -46,10 +78,8 @@ public class ExponentialMovingAverageIndicator implements Indicator<ExponentialM
 
         Object[] array24 = analysis.getPrices24().toArray();
 
-        int periodSpan = 10;
-
-        Object[] slice6 = getLastNPrices(7*periodSpan, array24);
-        Object[] slice24 = getLastNPrices(25*periodSpan, array24);
+        Object[] slice6 = getLastNPrices(shortEmaPeriods*periodSpan, array24);
+        Object[] slice24 = getLastNPrices(longEmaPeriods*periodSpan, array24);
 
         double currentEMA6h = exponential(periodSpan, slice6);
         double currentEMA24h = exponential(periodSpan, slice24);
@@ -68,7 +98,7 @@ public class ExponentialMovingAverageIndicator implements Indicator<ExponentialM
     public void updatePosition(Position position) {
         EmaPositionAnalysis positionAnalysis = new EmaPositionAnalysis();
         EmaCryptoAnalysis cryptoAnalysis = cast(position.getCurrency().getAnalysis());
-        double thresholdMADiff = cryptoAnalysis.getMovingAverageDiff() / 2;
+        double thresholdMADiff = cryptoAnalysis.getMovingAverageDiff() / thresholdEmaDiffFactor;
         if(thresholdMADiff > positionAnalysis.getThresholdMADiff()) {
             positionAnalysis.setThresholdMADiff(thresholdMADiff);
         }
@@ -77,7 +107,7 @@ public class ExponentialMovingAverageIndicator implements Indicator<ExponentialM
     @Override
     public Boolean shouldOpen(CryptoCurrency currency) {
         EmaCryptoAnalysis analysis = cast(currency.getAnalysis());
-        return analysis.getMovingAverageDiff() > 1 && analysis.getLastPricesSlope() > 0;
+        return analysis.getMovingAverageDiff() > thresholdEmaDiffCutOff && analysis.getLastPricesSlope() > 0;
     }
 
     @Override
