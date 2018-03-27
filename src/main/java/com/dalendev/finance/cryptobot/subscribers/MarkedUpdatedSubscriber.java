@@ -60,7 +60,7 @@ public class MarkedUpdatedSubscriber {
 
     @Subscribe
     public void selectBuyOrders(PositionsUpdatedEvent event) {
-        if (portfolio.getPositions().size() >= configService.getMaxOrderPositions())  {
+        if (portfolio.getPositions().size() >= configService.getMaxPositionsOpened())  {
             return;
         }
 
