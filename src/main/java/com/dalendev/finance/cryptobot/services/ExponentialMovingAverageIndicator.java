@@ -29,8 +29,8 @@ public class ExponentialMovingAverageIndicator implements Indicator<ExponentialM
     private final int periodSpan;
     private final int shortEmaPeriods;
     private final int longEmaPeriods;
-    private final int thresholdEmaDiffFactor;
-    private final int thresholdEmaDiffCutOff;
+    private final double thresholdEmaDiffFactor;
+    private final double thresholdEmaDiffCutOff;
     
 
     public ExponentialMovingAverageIndicator(ConfigService configService) {
@@ -48,8 +48,8 @@ public class ExponentialMovingAverageIndicator implements Indicator<ExponentialM
             @Value("${ema.periodSpan}") int periodSpan,
             @Value("${ema.shortEmaPeriods}") int shortEmaPeriods,
             @Value("${ema.longEmaPeriods}") int longEmaPeriods,
-            @Value("${ema.thresholdEmaDiffFactor}") int thresholdEmaDiffFactor,
-            @Value("${ema.thresholdEmaDiffCutOff}") int thresholdEmaDiffCutOff) {
+            @Value("${ema.thresholdEmaDiffFactor}") double thresholdEmaDiffFactor,
+            @Value("${ema.thresholdEmaDiffCutOff}") double thresholdEmaDiffCutOff) {
         this.configService = configService;
         this.periodSpan = periodSpan;
         this.shortEmaPeriods = shortEmaPeriods;
@@ -96,7 +96,7 @@ public class ExponentialMovingAverageIndicator implements Indicator<ExponentialM
 
     @Override
     public void updatePosition(Position position) {
-        EmaPositionAnalysis positionAnalysis = new EmaPositionAnalysis();
+        EmaPositionAnalysis positionAnalysis = (EmaPositionAnalysis) position.getAnalysis();
         EmaCryptoAnalysis cryptoAnalysis = cast(position.getCurrency().getAnalysis());
         double thresholdMADiff = cryptoAnalysis.getMovingAverageDiff() / thresholdEmaDiffFactor;
         if(thresholdMADiff > positionAnalysis.getThresholdMADiff()) {
@@ -183,6 +183,13 @@ public class ExponentialMovingAverageIndicator implements Indicator<ExponentialM
                     .put("prices24", prices24)
                     .build();
         }
+
+        @Override
+        public String toString() {
+            return "EmaCryptoAnalysis{" +
+                    "movingAverageDiff=" + movingAverageDiff +
+                    '}';
+        }
     }
 
     static class EmaPositionAnalysis implements PositionAnalysis {
@@ -198,6 +205,13 @@ public class ExponentialMovingAverageIndicator implements Indicator<ExponentialM
 
         void setThresholdMADiff(Double thresholdMADiff) {
             this.thresholdMADiff = thresholdMADiff;
+        }
+
+        @Override
+        public String toString() {
+            return "EmaPositionAnalysis{" +
+                    "thresholdMADiff=" + thresholdMADiff +
+                    '}';
         }
     }
 }

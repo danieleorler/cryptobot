@@ -92,12 +92,13 @@ public class Position {
 
     @Override
     public String toString() {
-        return String.format("%.8f %s opened at price %.8f [%.2f%%] open time %s, %s",
+        return String.format("%.8f %s opened at price %.8f [%.2f%%] open time %s, %s, %s",
             amount,
             currency.getSymbol(),
             openPrice,
             change,
             openTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
-            analysis.toString());
+            analysis.toString(),
+            currency.getAnalysis());
     }
 }
